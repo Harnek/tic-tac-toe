@@ -125,7 +125,7 @@ io.on('connection', (socket) => {
 
         const members = io.sockets.adapter.rooms[info.roomId].length
         if (members === 2){
-            socket.emit('playerJoined')
+            socket.to(info.roomId).emit('playerJoined')
         }
 
         playerId++;
@@ -138,6 +138,7 @@ io.on('connection', (socket) => {
             roomId,
             playerId,
             piece: 1,
+            turn: true
         }
         boards[roomId] = createBoard()
         waitingRooms.push(roomId)
@@ -164,20 +165,25 @@ io.on('connection', (socket) => {
             roomId: data.roomId,
             playerId,
             piece: 0,
+            turn: false
         }
 
         playerId++;
         leftWaitingRoom(data.roomId)
 
         socket.join(data.roomId)
-        socket.emit('playerJoined')
-        
+        socket.to(data.roomId).emit('playerJoined')
+
         callback(null, info)
     })
 
     socket.on('update', (data, callback) => {
         const i = data.x, j = data.y;
-        const members = io.sockets.adapter.rooms[data.roomId].length
+        let members = 0
+        const room = io.sockets.adapter.rooms[data.roomId]
+        if (room != undefined) {
+            members = room.length
+        }
 
         if (members < 2){
             callback('Second player has not joined')

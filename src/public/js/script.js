@@ -2,6 +2,8 @@ const socket = io();
 const board = document.getElementById('board')
 const menu = document.getElementById('menu')
 const status = document.getElementById('status')
+const myProgress = document.getElementById('myProgress')
+const myBar = document.getElementById('myBar')
 const roomDisplay = document.getElementById('roomDisplay')
 const newGameBt = document.getElementById('newGameBt')
 const createRoomBt = document.getElementById('createRoomBt')
@@ -11,6 +13,7 @@ let piece = null
 let turn = false
 let roomId = null
 let playerId = null
+let username = null
 let updating = false
 
 const displayError = (error) => {
@@ -44,7 +47,30 @@ const updateUI = (node, p) => {
     }
 }
 
+const load = () => {
+    let width = 1
+
+    frame = () => {
+        if (width >= 100) {
+            clearInterval(id);
+            status.style.display = 'none'
+            errorMsg.style.visibility = 'hidden'
+            myProgress.style.display = 'none'
+            myBar.style.width = '0%'
+            menu.style.display = 'block'
+        } else {
+            width++;
+            myBar.style.width = width + '%';
+        }
+    }
+
+    myProgress.style.display = 'block'
+    var id = setInterval(frame, 10);
+}
+
 function move(pos) {
+    errorMsg.style.visibility = 'hidden'
+
     if (updating === true || turn === false){
         return displayError('Wait for your opponent\'s turn')
     }
@@ -138,26 +164,20 @@ const joinRoom = () => {
             status.style.display = 'none'
 
             drawUI()
-
-            if (piece === 1) {
-                roomDisplay.innerHTML = 'Room ID: ' + roomId
-                roomDisplay.style.display = 'block'
-            }
         }
     })
 }
 
 socket.on('playerJoined', () => {
     displayError('Player 2 has joined')
+    roomDisplay.style.display = 'none'
 })
 
 socket.on('playerLeft', () => {
     errorMsg.style.visibility = 'none'
+    board.style.display = 'none'
     displayError('Your Opponent has left')
-    setTimeout(() => {
-        board.style.display = 'none'
-        menu.style.display = 'block'
-    }, 2000)
+    load()
 })
 
 //Listen for moves
@@ -181,7 +201,8 @@ socket.on('status', data => {
     board.style.display = 'none'
     status.innerHTML = msg
     status.style.display = 'block'
-    menu.style.display = 'block'
+
+    load()
 })
 
 newGameBt.onclick = newGame

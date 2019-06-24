@@ -100,3 +100,15 @@ td {
 #roomNo {
     display: none;
 }
+
+#myProgress {
+    width: 40%;
+    display: none;
+    /* background-color: grey; */
+  }
+  
+#myBar {
+    width: 1%;
+    height: 3px;
+    background-color: rgb(119, 119, 119);
+}
