@@ -1,5 +1,5 @@
 {
-  "name": "web_game",
+  "name": "tic-tac-toe",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,8 +8,8 @@
     "dev": "nodemon src/app.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Harnek",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^2.2.0"
