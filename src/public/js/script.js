@@ -4,7 +4,7 @@ const menu = document.getElementById('menu')
 const status = document.getElementById('status')
 const myProgress = document.getElementById('myProgress')
 const myBar = document.getElementById('myBar')
-const roomDisplay = document.getElementById('roomDisplay')
+const roomDisplay = eval(document.getElementById('roomDisplay'))
 const newGameBt = document.getElementById('newGameBt')
 const createRoomBt = document.getElementById('createRoomBt')
 const joinRoomBt = document.getElementById('joinRoomBt')
@@ -25,7 +25,6 @@ const displayError = (error) => {
 }
 
 const drawUI = () => {
-    // Attach on event listener
     for (var i = 0; i < board.rows.length; i++) {
         for (var j = 0; j < board.rows[i].cells.length; j++) {
             board.rows[i].cells[j].innerHTML = '<div></div>'
@@ -68,7 +67,15 @@ const load = () => {
     var id = setInterval(frame, 10);
 }
 
-function move(pos) {
+const copyToClipboard = () => {
+    roomDisplay.select();
+    if (document.execCommand('copy')){
+        roomDisplay.selectionStart = roomDisplay.selectionEnd;
+        // $('.error').stop().fadeIn(400).delay(3000).fadeOut(400);
+    }
+}
+
+const move = (pos) => {
     errorMsg.style.visibility = 'hidden'
 
     if (updating === true || turn === false){
@@ -83,8 +90,6 @@ function move(pos) {
         x: pos.target.parentNode.rowIndex,
         y: pos.target.cellIndex
     }
-
-    console.log(data)
 
     socket.emit('update', data, (error) => {
         if (error) {
@@ -101,7 +106,6 @@ function move(pos) {
 }
 
 const newGame = () => {
-    //Send Get Piece Event
     socket.emit('newPlayer', null, (error, data) => {
         if (error) {
             alert(error)
@@ -113,13 +117,12 @@ const newGame = () => {
             turn = data.turn
 
             menu.style.display = 'none';
-            errorMsg.style.visibility = 'none'
+            errorMsg.style.visibility = 'hidden'
             status.style.display = 'none'
             
             drawUI()   
         }
     })
-    console.log(turn)
 }
 
 const createRoom = () => {
@@ -133,12 +136,11 @@ const createRoom = () => {
             turn = data.turn
 
             menu.style.display = 'none';
-            errorMsg.style.visibility = 'none'
+            errorMsg.style.visibility = 'hidden'
             status.style.display = 'none'
 
             drawUI()
-
-            roomDisplay.innerHTML = 'Room ID: ' + roomId
+            roomDisplay.value = roomId
             roomDisplay.style.display = 'block'
         }
     })
@@ -160,7 +162,7 @@ const joinRoom = () => {
             turn = data.turn
 
             menu.style.display = 'none';
-            errorMsg.style.visibility = 'none'
+            errorMsg.style.visibility = 'hidden'
             status.style.display = 'none'
 
             drawUI()
@@ -174,13 +176,12 @@ socket.on('playerJoined', () => {
 })
 
 socket.on('playerLeft', () => {
-    errorMsg.style.visibility = 'none'
+    errorMsg.style.visibility = 'hidden'
     board.style.display = 'none'
     displayError('Your Opponent has left')
     load()
 })
 
-//Listen for moves
 socket.on('updates', (data) => {
     errorMsg.style.visibility = 'hidden'
 
@@ -197,7 +198,7 @@ socket.on('status', data => {
         msg = (data.piece === piece) ? 'You Won': 'You Lose' 
     }
 
-    errorMsg.style.visibility = 'none'
+    errorMsg.style.visibility = 'hidden'
     board.style.display = 'none'
     status.innerHTML = msg
     status.style.display = 'block'
@@ -208,3 +209,4 @@ socket.on('status', data => {
 newGameBt.onclick = newGame
 createRoomBt.onclick = createRoom
 joinRoomBt.onclick = joinRoom
+roomDisplay.onclick = copyToClipboard

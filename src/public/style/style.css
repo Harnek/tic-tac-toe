@@ -35,7 +35,6 @@ section {
 }
 
 .button {
-    /* display: none; */
     border-radius: 100vmax;
     overflow: hidden;
     padding: 0.7em 3.85em 0.7em 4em;
@@ -97,15 +96,23 @@ td {
     background-color: rgba(0, 0, 0, 0);
 }
 
-#roomNo {
+#roomDisplay {
     display: none;
+    border: 0px none;
+    padding: 1em;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5em;
+    width: 10em;
+    box-shadow: rgba(0, 0, 0, 0.067) 0px 0.5em 1em 0px, rgba(0, 0, 0, 0.02) 0px 0px 0px 1px;
+    transition: box-shadow 0.3s ease 0s;
+    cursor: pointer;
 }
 
 #myProgress {
     width: 40%;
     display: none;
-    /* background-color: grey; */
-  }
+}
   
 #myBar {
     width: 1%;

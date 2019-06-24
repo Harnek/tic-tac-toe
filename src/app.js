@@ -221,7 +221,6 @@ io.on('connection', (socket) => {
                 break
             }
         }
-        console.log('disconnecting called')
     })
 })
 
