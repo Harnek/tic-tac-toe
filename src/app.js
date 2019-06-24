@@ -123,7 +123,7 @@ io.on('connection', (socket) => {
             socket.join(info.roomId)
         }
 
-        const members = io.sockets.adapter.rooms[data.roomId].length
+        const members = io.sockets.adapter.rooms[info.roomId].length
         if (members === 2){
             socket.emit('playerJoined')
         }
