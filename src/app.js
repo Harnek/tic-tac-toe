@@ -14,10 +14,10 @@ app.get('/', (req, res) => {
 })
 
 
-let boards = []
-let pieces = [0, 1]
-let roomId = 0
+const boards = {}
+const pieces = [0, 1]
 let playerId = 1
+const waitingRooms = []
 
 const createBoard = () => {
     let board = []
@@ -80,29 +80,98 @@ const fullBoard = (board) => {
     return true
 }
 
+const generateID = () => {
+    return (Math.random().toString().substr(2, 5))
+}
+
+const leftWaitingRoom = (rid) => {
+    for (var i = 0; i < waitingRooms.length; i++) {
+        if (waitingRooms[i] === rid){
+            waitingRooms.splice(i, 1)
+            return true
+        }
+    }
+
+    return false
+}
+
+
 io.on('connection', (socket) => {
     socket.on('newPlayer', (data, callback) => {
         console.log(`Player ${(playerId + 1) % 2 + 1} has joined`)
-        socket.join(String(roomId))
 
+        let info = {
+            roomId: null,
+            playerId,
+            piece: null,
+            turn: false
+        }
+
+        if (waitingRooms.length > 0) {
+            info.roomId = waitingRooms[0]
+            info.piece = 0
+
+            waitingRooms.splice(0, 1)
+            socket.join(info.roomId)
+        }else{
+            info.roomId = generateID()
+            info.piece = 1
+            info.turn = true
+
+            waitingRooms.push(info.roomId)
+            boards[info.roomId] = createBoard();
+            socket.join(info.roomId)
+        }
+
+        playerId++;
+        callback(null, info)
+    })
+
+    socket.on('createRoom', (data, callback) => {
+        const roomId = generateID()
         let info = {
             roomId,
             playerId,
-            piece: pieces[playerId % 2],
+            piece: 1,
         }
-        if (playerId % 2 === 1) {
-            boards[roomId] = createBoard()
-        }else{
-            roomId++;
-        }
+        boards[roomId] = createBoard()
+        waitingRooms.push(roomId)
         playerId++;
+        socket.join(roomId)
+        callback(null, info)
+    })
+
+    socket.on('joinRoom', (data, callback) => {
+        let members = 0
+        const room = io.sockets.adapter.rooms[data.roomId]
+        if (room != undefined) {
+            members = room.length
+        }
+        if (members === 0) {
+            return callback('Invalid Id')
+        }
+        if (members === 2) {
+            return callback('Game Full')
+        }
+
+        
+        let info = {
+            roomId: data.roomId,
+            playerId,
+            piece: 0,
+        }
+
+        playerId++;
+        socket.join(data.roomId)
+        leftWaitingRoom(data.roomId)
         callback(null, info)
     })
 
     socket.on('update', (data, callback) => {
         const i = data.x, j = data.y;
-        
-        if (data.playerId === playerId - 1 && data.playerId % 2 === 1){
+        const members = io.sockets.adapter.rooms[data.roomId].length
+
+        if (members < 2){
             callback('Second player has not joined')
         }
         else if (boards[data.roomId][i][j] === null){
@@ -126,6 +195,19 @@ io.on('connection', (socket) => {
         } else {
             callback('Something Went Wrong')
         }
+    })
+
+    socket.on('disconnecting', () => {
+        console.log('Player left')
+        for (roomIDs in socket.rooms){
+            if (roomIDs.length === 5){
+                if (leftWaitingRoom(roomIDs) === false){
+                    socket.to(roomIDs).emit('playerLeft')
+                }
+                break
+            }
+        }
+        console.log('disconnecting called')
     })
 })
 

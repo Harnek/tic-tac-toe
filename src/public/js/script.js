@@ -1,14 +1,25 @@
 const socket = io();
-let board = document.getElementById('board')
-let status = document.getElementById('status')
-let newGameBt = document.getElementById('newGameBt')
-let errorMsg = document.getElementById('error')
+const board = document.getElementById('board')
+const menu = document.getElementById('menu')
+const status = document.getElementById('status')
+const roomDisplay = document.getElementById('roomDisplay')
+const newGameBt = document.getElementById('newGameBt')
+const createRoomBt = document.getElementById('createRoomBt')
+const joinRoomBt = document.getElementById('joinRoomBt')
+const errorMsg = document.getElementById('error')
 let piece = null
 let turn = false
 let roomId = null
 let playerId = null
 let updating = false
 
+const displayError = (error) => {
+    errorMsg.innerHTML = error
+    errorMsg.style.visibility = 'visible'
+    setTimeout(() => {
+        errorMsg.style.visibility = 'hidden'
+    }, 7000)
+}
 
 const drawUI = () => {
     // Attach on event listener
@@ -35,12 +46,7 @@ const updateUI = (node, p) => {
 
 function move(pos) {
     if (updating === true || turn === false){
-        errorMsg.innerHTML = 'Wait for your opponent\'s turn'
-        errorMsg.style.visibility = "visible"
-        setTimeout(() => {
-            errorMsg.style.visibility = "hidden"
-        }, 7000)
-        return
+        return displayError('Wait for your opponent\'s turn')
     }
     updating = true
 
@@ -52,13 +58,11 @@ function move(pos) {
         y: pos.target.cellIndex
     }
 
+    console.log(data)
+
     socket.emit('update', data, (error) => {
         if (error) {
-            errorMsg.innerHTML = error
-            errorMsg.style.visibility = 'visible'
-            setTimeout(() => {
-                errorMsg.style.visibility = 'hidden'
-            }, 7000)
+            displayError(error)
         }
         else {
             updateUI(pos.target.firstChild, piece)
@@ -80,18 +84,81 @@ const newGame = () => {
             roomId = data.roomId
             playerId = data.playerId
             piece = data.piece
-            
-            if (data.playerId % 2 == 1){
-                turn = true
-            }
+            turn = data.turn
 
-            newGameBt.style.display = 'none';
+            menu.style.display = 'none';
             errorMsg.style.visibility = 'none'
             status.style.display = 'none'
+            
+            drawUI()   
+        }
+    })
+    console.log(turn)
+}
+
+const createRoom = () => {
+    socket.emit('createRoom', null, (error, data) => {
+        if (error) {
+            displayError(error)
+        }else{
+            roomId = data.roomId
+            playerId = data.playerId
+            piece = data.piece
+            turn = data.turn
+
+            menu.style.display = 'none';
+            errorMsg.style.visibility = 'none'
+            status.style.display = 'none'
+
             drawUI()
+
+            roomDisplay.innerHTML = 'Room ID: ' + roomId
+            roomDisplay.style.display = 'block'
         }
     })
 }
+
+const joinRoom = () => {
+    let input = prompt("Enter Room Id: ", "")
+    const info = {
+        roomId: input
+    }
+
+    socket.emit('joinRoom', info, (error, data) => {
+        if (error) {
+            displayError(error)
+        }else{
+            roomId = data.roomId
+            playerId = data.playerId
+            piece = data.piece
+            turn = data.turn
+
+            menu.style.display = 'none';
+            errorMsg.style.visibility = 'none'
+            status.style.display = 'none'
+
+            drawUI()
+
+            if (piece === 1) {
+                roomDisplay.innerHTML = 'Room ID: ' + roomId
+                roomDisplay.style.display = 'block'
+            }
+        }
+    })
+}
+
+socket.on('playerJoined', () => {
+
+})
+
+socket.on('playerLeft', () => {
+    errorMsg.style.visibility = 'none'
+    displayError('Your Opponent has left')
+    setTimeout(() => {
+        board.style.display = 'none'
+        menu.style.display = 'block'
+    }, 2000)
+})
 
 //Listen for moves
 socket.on('updates', (data) => {
@@ -110,11 +177,13 @@ socket.on('status', data => {
         msg = (data.piece === piece) ? 'You Won': 'You Lose' 
     }
 
-    errorMsg.style.display = 'none'
+    errorMsg.style.visibility = 'none'
     board.style.display = 'none'
     status.innerHTML = msg
     status.style.display = 'block'
-    newGameBt.style.display = 'block'
+    menu.style.display = 'block'
 })
 
 newGameBt.onclick = newGame
+createRoomBt.onclick = createRoom
+joinRoomBt.onclick = joinRoom
