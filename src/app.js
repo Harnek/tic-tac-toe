@@ -123,6 +123,11 @@ io.on('connection', (socket) => {
             socket.join(info.roomId)
         }
 
+        const members = io.sockets.adapter.rooms[data.roomId].length
+        if (members === 2){
+            socket.emit('playerJoined')
+        }
+
         playerId++;
         callback(null, info)
     })
@@ -162,8 +167,11 @@ io.on('connection', (socket) => {
         }
 
         playerId++;
-        socket.join(data.roomId)
         leftWaitingRoom(data.roomId)
+
+        socket.join(data.roomId)
+        socket.emit('playerJoined')
+        
         callback(null, info)
     })
 

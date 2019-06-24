@@ -148,7 +148,7 @@ const joinRoom = () => {
 }
 
 socket.on('playerJoined', () => {
-
+    displayError('Player 2 has joined')
 })
 
 socket.on('playerLeft', () => {
