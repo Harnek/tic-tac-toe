@@ -3,8 +3,8 @@ const path = require('path')
 const fs = require('fs')
 
 const app = express()
-const server = require('http').createServer(app);
-const io = require('./utils/socket')(server);
+const server = require('http').createServer(app)
+const io = require('./utils/socket')(server)
 
 app.use(express.static(path.join(__dirname, 'public')))
 

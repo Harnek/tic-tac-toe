@@ -1,12 +1,10 @@
 const Board = require('./board')
+const { boards, waitingRooms } = require('../config/config')
 const { generateRoomID, generatePlayerID, leftWaitingRoom, clientsConnected } = require('./utils')
 
 module.exports = function(server){
 
     var io = require("socket.io")(server);
-
-    const boards = {}
-    const waitingRooms = []
     
     // TODO: can this be relocated??
     function clientsConnected(roomID) {

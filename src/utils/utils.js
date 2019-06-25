@@ -1,13 +1,13 @@
-const {boards, waitingRooms, playerID} = require('../config/config');
+const { waitingRooms } = require('../config/config')
 
-let player = 1
+let playerID = 1
 
 module.exports.generateRoomID = () => {    
     return (Math.random().toString().substr(2, 5))
 }
 
 module.exports.generatePlayerID = () => {
-    return player++;
+    return playerID++;
 }
 
 module.exports.leftWaitingRoom = (roomID) => {
