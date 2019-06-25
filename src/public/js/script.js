@@ -4,7 +4,11 @@ const menu = document.getElementById('menu')
 const status = document.getElementById('status')
 const myProgress = document.getElementById('myProgress')
 const myBar = document.getElementById('myBar')
-const roomDisplay = eval(document.getElementById('roomDisplay'))
+const nameInput = document.getElementById('nameInput')
+const roomDisplay = document.getElementById('roomDisplay')
+const nameDisplay = document.getElementById('nameDisplay')
+
+const continueBt = document.getElementById('continueBt')
 const newGameBt = document.getElementById('newGameBt')
 const createRoomBt = document.getElementById('createRoomBt')
 const joinRoomBt = document.getElementById('joinRoomBt')
@@ -14,6 +18,7 @@ let turn = false
 let roomID = null
 let playerId = null
 let username = null
+let oppname  = null
 let updating = false
 
 const displayError = (error) => {
@@ -21,10 +26,22 @@ const displayError = (error) => {
     errorMsg.style.visibility = 'visible'
     setTimeout(() => {
         errorMsg.style.visibility = 'hidden'
-    }, 7000)
+    }, 4000)
 }
 
-const drawUI = () => {
+const cleanUI = () => {
+    board.style.display = 'none'
+    menu.style.display = 'none'
+    myProgress.style.display = 'none'
+    nameInput.style.display = 'none'
+    status.style.display = 'none'
+    roomDisplay.style.display = 'none'
+    nameDisplay.style.display = 'none'
+    continueBt.style.display = 'none'
+    errorMsg.style.visibility = 'hidden'
+}
+
+const createBoardUI = () => {
     for (var i = 0; i < board.rows.length; i++) {
         for (var j = 0; j < board.rows[i].cells.length; j++) {
             board.rows[i].cells[j].innerHTML = '<div></div>'
@@ -36,7 +53,7 @@ const drawUI = () => {
     board.style.display = 'block';
 }
 
-const updateUI = (x, y, p) => {
+const updateBoardUI = (x, y, p) => {
     const node = board.rows[x].cells[y].firstChild
     if (p === 0){
         node.className = 'circle'
@@ -48,20 +65,15 @@ const updateUI = (x, y, p) => {
     node.parentNode.onclick = false
 }
 
-const loadUI = () => {
+const createMenuUI = () => {
+    oppname = null
     let width = 1
 
     frame = () => {
         if (width >= 100) {
             clearInterval(id);
 
-            board.style.display = 'none'
-            status.style.display = 'none'
-            errorMsg.style.visibility = 'hidden'
-            
-            myProgress.style.display = 'none'
-            myBar.style.width = '0%'
-            
+            cleanUI()
             menu.style.display = 'block'
         } else {
             width++;
@@ -81,6 +93,76 @@ const copyToClipboard = () => {
     }
 }
 
+const startGame = () => {
+    username = nameInput.value || 'Anonymous'
+
+    continueBt.parentNode.style.display = 'none'
+    createMenuUI()
+}
+
+const newGame = () => {
+    socket.emit('NEW_GAME', username, (error, data) => {
+        if (error) {
+            alert(error)
+        }
+        else{
+            roomID = data.roomID
+            playerId = data.playerId
+            piece = data.piece
+            turn = data.turn
+
+            cleanUI()
+            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Waiting...</span>'
+            nameDisplay.style.display = 'block'
+            createBoardUI()   
+        }
+    })
+}
+
+const createRoom = () => {
+    socket.emit('CREATE_ROOM', username, (error, data) => {
+        if (error) {
+            displayError(error)
+        }else{
+            roomID = data.roomID
+            playerId = data.playerId
+            piece = data.piece
+            turn = data.turn
+
+            cleanUI()
+            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Waiting...</span>'
+            nameDisplay.style.display = 'block'
+            createBoardUI()
+            roomDisplay.value = roomID
+            roomDisplay.style.display = 'block'
+        }
+    })
+}
+
+const joinRoom = () => {
+    let input = prompt("Enter Room Id: ", "")
+    const info = {
+        username: username,
+        roomID: input
+    }
+
+    socket.emit('JOIN_ROOM', info, (error, data) => {
+        if (error) {
+            displayError(error)
+        }else{
+            roomID = data.roomID
+            playerId = data.playerId
+            piece = data.piece
+            turn = data.turn
+
+            cleanUI()
+            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Anonymous</span>'
+            nameDisplay.style.display = 'block'
+            createBoardUI()
+        }
+    })
+}
+
 const update = (pos) => {
     errorMsg.style.visibility = 'hidden'
 
@@ -89,7 +171,7 @@ const update = (pos) => {
     }
 
     if (turn === false){
-        return displayError('Wait for your opponent\'s turn')
+        return displayError('Opponent\'s turn')
     }
     updating = true
 
@@ -103,72 +185,7 @@ const update = (pos) => {
     socket.emit('UPDATE', data)
 }
 
-const newGame = () => {
-    socket.emit('NEW_GAME', null, (error, data) => {
-        if (error) {
-            alert(error)
-        }
-        else{
-            roomID = data.roomID
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            menu.style.display = 'none';
-            errorMsg.style.visibility = 'hidden'
-            status.style.display = 'none'
-            
-            drawUI()   
-        }
-    })
-}
-
-const createRoom = () => {
-    socket.emit('CREATE_ROOM', null, (error, data) => {
-        if (error) {
-            displayError(error)
-        }else{
-            roomID = data.roomID
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            menu.style.display = 'none';
-            errorMsg.style.visibility = 'hidden'
-            status.style.display = 'none'
-
-            drawUI()
-            roomDisplay.value = roomID
-            roomDisplay.style.display = 'block'
-        }
-    })
-}
-
-const joinRoom = () => {
-    let input = prompt("Enter Room Id: ", "")
-    const info = {
-        roomID: input
-    }
-
-    socket.emit('JOIN_ROOM', info, (error, data) => {
-        if (error) {
-            displayError(error)
-        }else{
-            roomID = data.roomID
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            menu.style.display = 'none';
-            errorMsg.style.visibility = 'hidden'
-            status.style.display = 'none'
-
-            drawUI()
-        }
-    })
-}
-
-socket.on('PLAYER_JOINED', () => {
+socket.on('PLAYER_JOINED', (data) => {
     displayError('Player 2 has joined')
     roomDisplay.style.display = 'none'
 })
@@ -176,7 +193,7 @@ socket.on('PLAYER_JOINED', () => {
 socket.on('PLAYER_LEFT', () => {
     console.log("Player 2 Left")
     displayError('Your Opponent has left')
-    loadUI()
+    createMenuUI()
 })
 
 socket.on('UPDATED', (status) => {
@@ -188,7 +205,7 @@ socket.on('UPDATED', (status) => {
         displayError(status.error)
     }
     else {
-        updateUI(status.x, status.y, status.piece)
+        updateBoardUI(status.x, status.y, status.piece)
 
         if (status.state !== null && status.state !== 0){
             return gameEnd(status.state, status.piece)
@@ -211,15 +228,15 @@ const gameEnd = (state, p) => {
     if (state === 1) {
         msg = (piece === p) ? 'You Won': 'You Lose'
     }
-
-    errorMsg.style.visibility = 'hidden'
-    board.style.display = 'none'
-    status.innerHTML = msg
+    
+    cleanUI()
+    status.innerHTML = '<div id="empty"></div>' + msg
     status.style.display = 'block'
-
-    loadUI()
+    
+    createMenuUI()
 }
 
+continueBt.onclick = startGame
 newGameBt.onclick = newGame
 createRoomBt.onclick = createRoom
 joinRoomBt.onclick = joinRoom
