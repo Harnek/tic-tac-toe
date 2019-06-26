@@ -6,12 +6,6 @@ module.exports = function(server){
 
     var io = require("socket.io")(server);
     
-    // TODO: can this be relocated??
-    function clientsConnected(roomID) {
-        const clients = io.sockets.adapter.rooms[roomID]
-        return (clients === undefined)? 0: clients.length
-    }
-
     io.on('connection', function(socket) {
         socket.on('NEW_GAME', (data, callback) => {
             let status = {
@@ -35,12 +29,12 @@ module.exports = function(server){
             }
             socket.join(status.roomID)
     
-            const clients = clientsConnected(status.roomID)
-            if (clients === 2){
-                socket.to(status.roomID).emit('PLAYER_JOINED')
-            }
-    
+            const clients = clientsConnected(io, status.roomID)
             callback(null, status)
+
+            if (clients === 2){
+                io.in(status.roomID).emit('PLAYER_JOINED')
+            }
         
             console.log(`Player joined room: ${status.roomID}`)
         })
@@ -61,7 +55,7 @@ module.exports = function(server){
         })
     
         socket.on('JOIN_ROOM', (data, callback) => {
-            let clients = clientsConnected(data.roomID)
+            let clients = clientsConnected(io, data.roomID)
             if (clients === 0) {
                 return callback('Invalid Game')
             }
@@ -83,7 +77,11 @@ module.exports = function(server){
     
             callback(null, status)
         })
-    
+        
+        socket.on('GET_USERNAME', (data, callback) => {
+            socket.to(data.roomID).emit('SET_USERNAME', data.username)
+        })
+
         socket.on('UPDATE', (data, callback) => {
             let status = {
                 error: null,
@@ -93,7 +91,7 @@ module.exports = function(server){
                 y: data.y
             }
     
-            const clients = clientsConnected(data.roomID)
+            const clients = clientsConnected(io, data.roomID)
     
             if (clients === 0) {
                 status.error = 'Invalid Game. Please Restart'

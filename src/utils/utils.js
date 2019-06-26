@@ -19,7 +19,8 @@ module.exports.leftWaitingRoom = (roomID) => {
     return null
 }
 
-module.exports.clientsConnected = (roomID) => {
+//TODO: passing io, better way
+module.exports.clientsConnected = (io, roomID) => {
     const clients = io.sockets.adapter.rooms[roomID]
     return (clients === undefined)? 0: clients.length
 }

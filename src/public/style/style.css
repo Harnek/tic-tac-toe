@@ -32,6 +32,7 @@
 #mainTitle > h1 {
     font-size: 1.75em;
     margin: 10% 0 15% 0;
+    /* border-bottom: 3px solid rgb(119, 119, 119); */
 }
 
 #nameInput {
@@ -149,8 +150,10 @@ td {
 }
 
 #myProgress {
-    width: 40%;
+    width: 100%;
     display: none;
+    margin-top: 5%;
+    max-width: 300px;
 }
   
 #myBar {

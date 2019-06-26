@@ -13,12 +13,12 @@ const newGameBt = document.getElementById('newGameBt')
 const createRoomBt = document.getElementById('createRoomBt')
 const joinRoomBt = document.getElementById('joinRoomBt')
 const errorMsg = document.getElementById('error')
-let piece = null
-let turn = false
-let roomID = null
+let roomID   = null
 let playerId = null
+let piece    = null
+let turn     = false
 let username = null
-let oppname  = null
+let opponent = null
 let updating = false
 
 const displayError = (error) => {
@@ -88,7 +88,7 @@ const createMenuUI = () => {
     }
 
     myProgress.style.display = 'block'
-    var id = setInterval(frame, 5);
+    var id = setInterval(frame, 3);
 }
 
 const copyToClipboard = () => {
@@ -107,7 +107,7 @@ const startGame = () => {
 }
 
 const newGame = () => {
-    socket.emit('NEW_GAME', username, (error, data) => {
+    socket.emit('NEW_GAME', null, (error, data) => {
         if (error) {
             alert(error)
         }
@@ -118,15 +118,13 @@ const newGame = () => {
             turn = data.turn
 
             cleanUI()
-            nameDisplay.innerHTML = '<span>' + username +'</span>' + '<span>Waiting...</span>'
-            nameDisplay.style.display = 'flex'
             createBoardUI()   
         }
     })
 }
 
 const createRoom = () => {
-    socket.emit('CREATE_ROOM', username, (error, data) => {
+    socket.emit('CREATE_ROOM', null, (error, data) => {
         if (error) {
             displayError(error)
         }else{
@@ -136,8 +134,6 @@ const createRoom = () => {
             turn = data.turn
 
             cleanUI()
-            nameDisplay.innerHTML = '<span>' + username +'</span>' + '<span>Waiting...</span>'
-            nameDisplay.style.display = 'flex'
             createBoardUI()
             roomDisplay.value = roomID
             roomDisplay.style.display = 'block'
@@ -148,7 +144,6 @@ const createRoom = () => {
 const joinRoom = () => {
     let input = prompt("Enter Room Id: ", "")
     const info = {
-        username: username,
         roomID: input
     }
 
@@ -162,8 +157,6 @@ const joinRoom = () => {
             turn = data.turn
 
             cleanUI()
-            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Anonymous</span>'
-            nameDisplay.style.display = 'flex'
             createBoardUI()
         }
     })
@@ -191,8 +184,9 @@ const update = (pos) => {
     socket.emit('UPDATE', data)
 }
 
-socket.on('PLAYER_JOINED', (data) => {
+socket.on('PLAYER_JOINED', () => {
     displayError('Player 2 has joined')
+    socket.emit('GET_USERNAME', {roomID, username});
     roomDisplay.style.display = 'none'
 })
 
@@ -200,6 +194,12 @@ socket.on('PLAYER_LEFT', () => {
     console.log("Player 2 Left")
     displayError('Your Opponent has left')
     createMenuUI()
+})
+
+socket.on('SET_USERNAME', (opponent) => {
+    nameDisplay.innerHTML = '<span>' + username +'</span>' 
+                            + '<span>' + opponent + '</span>'
+    nameDisplay.style.display = 'flex'
 })
 
 socket.on('UPDATED', (status) => {
