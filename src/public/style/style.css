@@ -7,7 +7,15 @@
 .container2 {
     width: 100%;
     height: 100%;
-    overflow: hidden auto;
+    margin: auto;
+    overflow: hidden;
+    max-width: 50em;
+    display: flex;
+    flex-direction: column;
+    -moz-box-pack: center;
+    justify-content: center;
+    -moz-box-align: center;
+    align-items: center;
 }
 
 .container3 {
@@ -17,15 +25,17 @@
     justify-content: center;
     -moz-box-align: center;
     align-items: center;
-    width: 100%;
-    min-height: 100%;
-    max-width: 50em;
-    margin: auto;
+    /* max-width: 50em; */
+    margin: 3% 0 3% 0;
 }
 
-input {
+#mainTitle > h1 {
+    font-size: 1.75em;
+    margin: 10% 0 15% 0;
+}
+
+#nameInput {
     border-radius: 3em;
-    overflow: hidden;
     padding: 0.75em 2em;
     display: inline-block;
     background-color: rgb(247, 247, 247);
@@ -39,11 +49,15 @@ input {
     pointer-events: auto;
 }
 
-section {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
+#nameDisplay {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 5%;
+    font-size: 0.9em;
+}
+
+span {
+    margin: 0 15% 0 15%;
 }
 
 #empty {
@@ -55,19 +69,22 @@ section {
     display: none;
 }
 
-#status {
+#statusDisplay {
+    font-size: 2em;
+    font-weight: bold;
     display: none;
 }
 
 #nameDisplay {
     display: none;
-    margin: 0 10% 0 10%;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.10em;
     align-self: stretch;
 }
 
 .button {
     border-radius: 100vmax;
-    overflow: hidden;
     padding: 0.7em 3.85em 0.7em 4em;
     text-transform: uppercase;
     font-weight: 700;
@@ -89,8 +106,9 @@ section {
 
 table {
     display: none;
-    box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 2em;
     border-collapse: collapse;
+    border-radius: 2em;
+    box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 2em;
 }
 td {
     font-size: 85px;
@@ -99,7 +117,6 @@ td {
     height: 100px;
     width: 100px;
     min-width: 100px;
-    border: 1px solid rgb(119, 119, 119);	
 }
 
 .cross {
@@ -128,6 +145,7 @@ td {
     box-shadow: rgba(0, 0, 0, 0.067) 0px 0.5em 1em 0px, rgba(0, 0, 0, 0.02) 0px 0px 0px 1px;
     transition: box-shadow 0.3s ease 0s;
     cursor: pointer;
+    margin: 3% 0 3% 0;
 }
 
 #myProgress {
@@ -143,5 +161,6 @@ td {
 
 #error {
     visibility: hidden;
+    margin-top: 5%;
     color: red;
 }

@@ -1,12 +1,12 @@
 const socket = io();
 const board = document.getElementById('board')
 const menu = document.getElementById('menu')
-const status = document.getElementById('status')
 const myProgress = document.getElementById('myProgress')
 const myBar = document.getElementById('myBar')
 const nameInput = document.getElementById('nameInput')
-const roomDisplay = document.getElementById('roomDisplay')
 const nameDisplay = document.getElementById('nameDisplay')
+const roomDisplay = document.getElementById('roomDisplay')
+const statusDisplay = document.getElementById('statusDisplay')
 
 const continueBt = document.getElementById('continueBt')
 const newGameBt = document.getElementById('newGameBt')
@@ -34,7 +34,7 @@ const cleanUI = () => {
     menu.style.display = 'none'
     myProgress.style.display = 'none'
     nameInput.style.display = 'none'
-    status.style.display = 'none'
+    statusDisplay.style.display = 'none'
     roomDisplay.style.display = 'none'
     nameDisplay.style.display = 'none'
     continueBt.style.display = 'none'
@@ -47,6 +47,12 @@ const createBoardUI = () => {
             board.rows[i].cells[j].innerHTML = '<div></div>'
             board.rows[i].cells[j].onclick = function (pos) {
                 update(pos);
+            }
+            if (i < 2) {
+                board.rows[i].cells[j].style.borderBottom = "1px solid black"
+            }
+            if (j < 2) {
+                board.rows[i].cells[j].style.borderRight = "1px solid black"
             }
         }
     }
@@ -82,7 +88,7 @@ const createMenuUI = () => {
     }
 
     myProgress.style.display = 'block'
-    var id = setInterval(frame, 10);
+    var id = setInterval(frame, 5);
 }
 
 const copyToClipboard = () => {
@@ -112,8 +118,8 @@ const newGame = () => {
             turn = data.turn
 
             cleanUI()
-            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Waiting...</span>'
-            nameDisplay.style.display = 'block'
+            nameDisplay.innerHTML = '<span>' + username +'</span>' + '<span>Waiting...</span>'
+            nameDisplay.style.display = 'flex'
             createBoardUI()   
         }
     })
@@ -130,8 +136,8 @@ const createRoom = () => {
             turn = data.turn
 
             cleanUI()
-            nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Waiting...</span>'
-            nameDisplay.style.display = 'block'
+            nameDisplay.innerHTML = '<span>' + username +'</span>' + '<span>Waiting...</span>'
+            nameDisplay.style.display = 'flex'
             createBoardUI()
             roomDisplay.value = roomID
             roomDisplay.style.display = 'block'
@@ -157,7 +163,7 @@ const joinRoom = () => {
 
             cleanUI()
             nameDisplay.innerHTML = '<div id="empty"></div>' + '<span>' + username +'</span>' + '<span style="float: right;">Anonymous</span>'
-            nameDisplay.style.display = 'block'
+            nameDisplay.style.display = 'flex'
             createBoardUI()
         }
     })
@@ -230,8 +236,8 @@ const gameEnd = (state, p) => {
     }
     
     cleanUI()
-    status.innerHTML = '<div id="empty"></div>' + msg
-    status.style.display = 'block'
+    statusDisplay.innerHTML = msg
+    statusDisplay.style.display = 'flex'
     
     createMenuUI()
 }
@@ -241,3 +247,10 @@ newGameBt.onclick = newGame
 createRoomBt.onclick = createRoom
 joinRoomBt.onclick = joinRoom
 roomDisplay.onclick = copyToClipboard
+
+nameInput.addEventListener("keyup", (event) => {
+    if (event.keyCode === 13) {
+        event.preventDefault()
+        continueBt.click()
+    }
+})

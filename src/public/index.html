@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>tic tak toe</title>
+	<title>tic tac toe</title>
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="/style/global.css">
@@ -10,56 +10,46 @@
 <body>
 	<div class="container">
 		<div class="container2">
-			<section>
-				<div class="container3">
-					<h1 class="mainTitle">tic tac toe</h1>
-
-					<div>
-						<div id="empty"></div>
-						<label>
-							<input id="nameInput" placeholder="Name">
-						</label>
-						<div id="continueBt" class="button">Continue</div>
-					</div>
-					<div id="nameDisplay"></div>
-					<h1 id="status"></h1>
-					<div id="empty"></div>
-					<div id="menu">
-						<div id="newGameBt" class="button">New Game</div>
-						<div id="createRoomBt" class="button">Create Room</div>
-						<div id="joinRoomBt" class="button">Join Room</div>
-					</div>
-
-					<table id="board">
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-					</table>
+			<div id="mainTitle">
+				<h1>tic tac toe</h1>
+			</div>
+			<label id="welcome">
+				<input id="nameInput" placeholder="Name" autofocus>
+				<div class="button" id="continueBt">Continue</div>
+			</label>
+			<div class="container3" id="nameDisplay"></div>
+			<div id="statusDisplay"></div>
 				
-					<div id="empty"></div>
-					<input id="roomDisplay" readonly>
-					<div id="myProgress">
-						<div id="myBar"></div>
-					</div>
+			<div id="menu">
+				<div id="newGameBt" class="button">New Game</div>
+				<div id="createRoomBt" class="button">Create Room</div>
+				<div id="joinRoomBt" class="button">Join Room</div>
+			</div>
 
-					<div id="empty"></div>
-					<div id="error">Error:</div>
-					
+			<table id="board">
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+				
+			<input id="roomDisplay" readonly>
+			<div id="myProgress">
+				<div id="myBar"></div>
+			</div>
 
-				</div>
-			</section>
+			<div id="error">Error:</div>
 		</div>
 	</div>
 

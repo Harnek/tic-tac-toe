@@ -1,8 +1,8 @@
 *,:after,:before,input {
-    box-sizing: border-box;
-    position: relative;
-    font-family: Helvetica, sans-serif;
-    color: rgb(119, 119, 119);
+  box-sizing: border-box;
+  position: relative;
+  font-family: Helvetica, sans-serif;
+  color: rgb(119, 119, 119);
 }
 
 html {
@@ -13,7 +13,6 @@ html, body {
   margin: 0;
   width: 100%;
   height: 100%;
-  overscroll-behavior: contain;
 }
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
