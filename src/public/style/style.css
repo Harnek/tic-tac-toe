@@ -144,7 +144,6 @@ table {
     box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 2em;
 }
 td {
-    font-size: 85px;
     text-align: center; 
     vertical-align: middle;
     height: 100px;
@@ -153,12 +152,13 @@ td {
 }
 
 .cross {
+    font-size-adjust: 2.2;
     color: rgb(119, 119, 119);
 }
 
 .circle {
-    height: 50%;
-    width: 50%;
+    height: 40%;
+    width: 40%;
     margin: auto;
     border-radius: 50%;
     border-style: solid;

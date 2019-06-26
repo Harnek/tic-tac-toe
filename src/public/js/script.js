@@ -211,7 +211,7 @@ socket.on('PLAYER_JOINED', () => {
 socket.on('PLAYER_LEFT', () => {
     console.log("Player 2 Left")
     displayError('Your Opponent has left')
-    createMenuUI()
+    leaveRoom()
 })
 
 socket.on('SET_USERNAME', (data) => {
@@ -274,7 +274,7 @@ const rematch = () => {
 }
 
 const leaveRoom = () => {
-    socket.emit('LEAVE_ROOM', roomID)
+    socket.emit('LEAVE_ROOM', {roomID})
     roomID   = null
     piece    = null
     turn     = false

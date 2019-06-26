@@ -74,7 +74,7 @@ module.exports = function(server){
     
             socket.join(data.roomID)
             callback(null, status)
-            
+
             io.in(data.roomID).emit('PLAYER_JOINED')
         })
 
@@ -85,6 +85,7 @@ module.exports = function(server){
         })
         
         socket.on('GET_USERNAME', (data, callback) => {
+            console.log(data.username)
             socket.to(data.roomID).emit('SET_USERNAME', data.username)
         })
 
@@ -116,7 +117,6 @@ module.exports = function(server){
         })
     
         socket.on('REMATCH', (data) => {
-            console.log(boards[data.roomID])
             boards[data.roomID].reset()
         })
 
