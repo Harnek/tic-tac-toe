@@ -1,47 +1,66 @@
 const socket = io();
-const board = document.getElementById('board')
-const menu = document.getElementById('menu')
-const myProgress = document.getElementById('myProgress')
-const myBar = document.getElementById('myBar')
-const nameInput = document.getElementById('nameInput')
-const nameDisplay = document.getElementById('nameDisplay')
-const roomDisplay = document.getElementById('roomDisplay')
-const statusDisplay = document.getElementById('statusDisplay')
 
+const nameInput = document.getElementById('nameInput')
 const continueBt = document.getElementById('continueBt')
+
+const menu = document.getElementById('menu')
+
+const board = document.getElementById('board')
+const boardDisplay = document.getElementById('boardDisplay')
+const playerName1 = document.getElementById('playerName1')
+const playerName2 = document.getElementById('playerName2')
+const playerScore1 = document.getElementById('playerScore1')
+const playerScore2 = document.getElementById('playerScore2')
+
 const newGameBt = document.getElementById('newGameBt')
 const createRoomBt = document.getElementById('createRoomBt')
 const joinRoomBt = document.getElementById('joinRoomBt')
-const errorMsg = document.getElementById('error')
+
+const roomDisplay = document.getElementById('roomDisplay')
+
+const endScreen = document.getElementById('endScreen')
+const statusDisplay = document.getElementById('statusDisplay')
+const playAgainBt = document.getElementById('playAgainBt')
+const goMenuBt = document.getElementById('goMenuBt')
+
+const myProgress = document.getElementById('myProgress')
+const myBar = document.getElementById('myBar')
+const errorDisplay = document.getElementById('errorDisplay')
+
 let roomID   = null
 let playerId = null
 let piece    = null
 let turn     = false
 let username = null
 let opponent = null
+let playerWins = 0
+let opponentWins = 0
 let updating = false
 
 const displayError = (error) => {
-    errorMsg.innerHTML = error
-    errorMsg.style.visibility = 'visible'
+    errorDisplay.innerHTML = error
+    errorDisplay.style.visibility = 'visible'
     setTimeout(() => {
-        errorMsg.style.visibility = 'hidden'
+        errorDisplay.style.visibility = 'hidden'
     }, 4000)
 }
 
 const cleanUI = () => {
-    board.style.display = 'none'
     menu.style.display = 'none'
-    myProgress.style.display = 'none'
-    nameInput.style.display = 'none'
-    statusDisplay.style.display = 'none'
+    boardDisplay.style.display = 'none'
     roomDisplay.style.display = 'none'
-    nameDisplay.style.display = 'none'
-    continueBt.style.display = 'none'
-    errorMsg.style.visibility = 'hidden'
+    endScreen.style.display = 'none'
+    myProgress.style.display = 'none'
+    errorDisplay.style.visibility = 'hidden'
 }
 
 const createBoardUI = () => {
+    username = nameInput.value || 'Anonymous'
+    playerName1.innerHTML = username
+    playerName2.innerHTML = opponent || 'Opponent'
+    playerScore1.innerHTML = playerWins
+    playerScore2.innerHTML = opponentWins
+
     for (var i = 0; i < board.rows.length; i++) {
         for (var j = 0; j < board.rows[i].cells.length; j++) {
             board.rows[i].cells[j].innerHTML = '<div></div>'
@@ -56,7 +75,7 @@ const createBoardUI = () => {
             }
         }
     }
-    board.style.display = 'block';
+    boardDisplay.style.display = 'flex';
 }
 
 const updateBoardUI = (x, y, p) => {
@@ -72,7 +91,7 @@ const updateBoardUI = (x, y, p) => {
 }
 
 const createMenuUI = () => {
-    oppname = null
+    opponent = null
     let width = 1
 
     frame = () => {
@@ -80,6 +99,7 @@ const createMenuUI = () => {
             clearInterval(id);
 
             cleanUI()
+            console.log("CALLED")
             menu.style.display = 'block'
         } else {
             width++;
@@ -100,8 +120,6 @@ const copyToClipboard = () => {
 }
 
 const startGame = () => {
-    username = nameInput.value || 'Anonymous'
-
     continueBt.parentNode.style.display = 'none'
     createMenuUI()
 }
@@ -163,7 +181,7 @@ const joinRoom = () => {
 }
 
 const update = (pos) => {
-    errorMsg.style.visibility = 'hidden'
+    errorDisplay.style.visibility = 'hidden'
 
     if (updating === true){
         return
@@ -196,14 +214,13 @@ socket.on('PLAYER_LEFT', () => {
     createMenuUI()
 })
 
-socket.on('SET_USERNAME', (opponent) => {
-    nameDisplay.innerHTML = '<span>' + username +'</span>' 
-                            + '<span>' + opponent + '</span>'
-    nameDisplay.style.display = 'flex'
+socket.on('SET_USERNAME', (data) => {
+    opponent = data
+    playerName2.innerHTML = opponent || 'Anonymous'
 })
 
 socket.on('UPDATED', (status) => {
-    errorMsg.style.visibility = 'hidden'
+    errorDisplay.style.visibility = 'hidden'
 
     console.log(status)
 
@@ -213,15 +230,14 @@ socket.on('UPDATED', (status) => {
     else {
         updateBoardUI(status.x, status.y, status.piece)
 
-        if (status.state !== null && status.state !== 0){
-            return gameEnd(status.state, status.piece)
-        }
-
         if (piece !== status.piece) {
             turn = true
-            // displayError('Your Turn')
         }else{
             turn = false
+        }
+
+        if (status.state !== null && status.state !== 0){
+            return gameEnd(status.state, status.piece)
         }
     }
     updating = false
@@ -232,13 +248,40 @@ const gameEnd = (state, p) => {
     let msg = 'Game Draw'
 
     if (state === 1) {
-        msg = (piece === p) ? 'You Won': 'You Lose'
+        if (piece === p) {
+            msg = 'You Won'
+            playerWins += 1
+        }
+        else {
+            msg = 'You Lose'
+            opponentWins += 1
+        }
     }
     
     cleanUI()
     statusDisplay.innerHTML = msg
-    statusDisplay.style.display = 'flex'
-    
+    endScreen.style.display = 'flex'
+}
+
+const rematch = () => {
+    let status = {
+        roomID
+    }
+    socket.emit('REMATCH', status)
+    cleanUI()
+    createBoardUI()
+    console.log(turn)
+}
+
+const leaveRoom = () => {
+    socket.emit('LEAVE_ROOM', roomID)
+    roomID   = null
+    piece    = null
+    turn     = false
+    opponent = null
+    playerWins = 0
+    opponentWins = 0
+    updating = false
     createMenuUI()
 }
 
@@ -247,6 +290,8 @@ newGameBt.onclick = newGame
 createRoomBt.onclick = createRoom
 joinRoomBt.onclick = joinRoom
 roomDisplay.onclick = copyToClipboard
+playAgainBt.onclick = rematch
+goMenuBt.onclick = leaveRoom
 
 nameInput.addEventListener("keyup", (event) => {
     if (event.keyCode === 13) {

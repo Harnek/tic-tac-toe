@@ -31,7 +31,7 @@
 
 #mainTitle > h1 {
     font-size: 1.75em;
-    margin: 10% 0 15% 0;
+    margin: 10% 0 25% 0;
     /* border-bottom: 3px solid rgb(119, 119, 119); */
 }
 
@@ -70,18 +70,16 @@ span {
     display: none;
 }
 
-#statusDisplay {
-    font-size: 2em;
-    font-weight: bold;
+#endScreen {
     display: none;
 }
 
-#nameDisplay {
-    display: none;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.10em;
-    align-self: stretch;
+#statusDisplay {
+    width: 100%;
+    text-align: center;
+    margin: 10% 0 10% 0;
+    font-size: 2em;
+    font-weight: bold;
 }
 
 .button {
@@ -105,8 +103,42 @@ span {
     transition: opacity 0.3s ease 0s;
 }
 
-table {
+#boardDisplay {
     display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-evenly;
+    margin: 0 10% 0 10%;
+}
+
+#scoreboard {
+    min-width: 300px;
+    flex-direction: row;
+}
+
+#scoreboard > div {
+    margin: 3%;
+    width: 100%;
+}
+
+#scoreboard > div > div {
+    text-align: center;
+}
+
+#playerName1, #playerName2 {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    align-self: stretch;
+}
+
+#playerScore1, #playerScore2 {
+    font-size: 3em;
+    font-weight: bold;
+}
+
+table {
     border-collapse: collapse;
     border-radius: 2em;
     box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 2em;
@@ -162,8 +194,42 @@ td {
     background-color: rgb(119, 119, 119);
 }
 
-#error {
+#errorDisplay {
     visibility: hidden;
     margin-top: 5%;
     color: red;
+}
+
+@media only screen and (max-width: 400px) {
+    body {
+      /* background-color: #F09A9D; */
+    }
+    #adjust {
+        display: none;
+    }
+    #scoreboard {
+        flex-direction: row;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 960px) {
+    body {
+        /* background-color: #F5CF8E; */
+    }
+    #adjust {
+        display: none;
+    }
+    #scoreboard {
+        flex-direction: row;
+    }
+}
+  
+
+@media only screen and (min-width: 961px) {
+    body {
+      /* background-color: #B2D6FF; */
+    }
+    #adjust {
+        display: block;
+    }  
 }

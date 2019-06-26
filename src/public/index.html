@@ -17,39 +17,57 @@
 				<input id="nameInput" placeholder="Name" autofocus>
 				<div class="button" id="continueBt">Continue</div>
 			</label>
-			<div class="container3" id="nameDisplay"></div>
-			<div id="statusDisplay"></div>
+			<div class="container3" id="boardDisplay">
+				<div id="adjust"></div>
+				<div>
+					<table id="board">
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+				<div id="scoreboard" class="container3">
+					<div>
+						<div id="playerName1"></div>
+						<div id="playerScore1" width="100%">0</div>
+					</div>
+					<div>
+						<div id="playerName2"></div>
+						<div id="playerScore2" width="100%">0</div>
+					</div>
+				</div>
+			</div>
 				
 			<div id="menu">
-				<div id="newGameBt" class="button">New Game</div>
-				<div id="createRoomBt" class="button">Create Room</div>
-				<div id="joinRoomBt" class="button">Join Room</div>
+				<div id="newGameBt" class="button">new game</div>
+				<div id="createRoomBt" class="button">create room</div>
+				<div id="joinRoomBt" class="button">join room</div>
 			</div>
 
-			<table id="board">
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-			</table>
-				
+			<div id="endScreen" class="container3">
+					<div id="statusDisplay"></div>
+					<div id="playAgainBt" class="button">play again</div>
+					<div id="goMenuBt" class="button">go to menu</div>
+			</div>
+
 			<input id="roomDisplay" readonly>
 			<div id="myProgress">
 				<div id="myBar"></div>
 			</div>
 
-			<div id="error">Error:</div>
+			<div id="errorDisplay">Error:</div>
 		</div>
 	</div>
 

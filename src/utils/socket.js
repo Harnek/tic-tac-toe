@@ -73,9 +73,15 @@ module.exports = function(server){
             leftWaitingRoom(data.roomID)
     
             socket.join(data.roomID)
-            socket.to(data.roomID).emit('PLAYER_JOINED')
-    
             callback(null, status)
+            
+            io.in(data.roomID).emit('PLAYER_JOINED')
+        })
+
+        socket.on('LEAVE_ROOM', (data) => {
+            socket.to(data.roomID).emit('PLAYER_LEFT')
+            socket.leave(data.roomID)
+            delete boards[roomID]
         })
         
         socket.on('GET_USERNAME', (data, callback) => {
@@ -109,12 +115,18 @@ module.exports = function(server){
             io.to(data.roomID).emit('UPDATED', status)
         })
     
+        socket.on('REMATCH', (data) => {
+            console.log(boards[data.roomID])
+            boards[data.roomID].reset()
+        })
+
         socket.on('disconnecting', () => {
             for (roomID in socket.rooms){
                 if (roomID.length === 5){
                     leftWaitingRoom(roomID)
                     socket.to(roomID).emit('PLAYER_LEFT')
-                    
+                    delete boards[roomID]
+
                     console.log(`Player left room: ${roomID}`)
                 }
             }
