@@ -35,6 +35,10 @@
     /* border-bottom: 3px solid rgb(119, 119, 119); */
 }
 
+#mainTitle > h1 > a {
+    text-decoration: none;
+}
+
 #nameInput {
     border-radius: 3em;
     padding: 0.75em 2em;
@@ -208,6 +212,7 @@ td {
         display: none;
     }
     #scoreboard {
+        margin-top: 8%;
         flex-direction: row;
     }
 }

@@ -220,6 +220,23 @@ socket.on('UPDATED', (data) => {
     console.log("Turn", turn)
 });
 
+socket.on('PLAYER_JOINED', () => {
+    displayError('Player 2 joined')
+    socket.emit('GET_USERNAME');
+    roomDisplay.style.display = 'none'
+})
+
+socket.on('PLAYER_LEFT', () => {
+    console.log("Player 2 Left")
+    displayError('Your Opponent has left')
+    leaveRoom()
+})
+
+socket.on('SET_USERNAME', (username) => {
+    opponent = username
+    playerName2.innerHTML = opponent || 'Anonymous'
+})
+
 const gameEnd = (state, p) => {
     let msg = 'Game Draw'
 
@@ -243,24 +260,10 @@ const gameEnd = (state, p) => {
     console.log("Turn", turn)
 }
 
-socket.on('PLAYER_JOINED', () => {
-    displayError('Player 2 joined')
-    socket.emit('GET_USERNAME');
-    roomDisplay.style.display = 'none'
-})
-
-socket.on('PLAYER_LEFT', () => {
-    console.log("Player 2 Left")
-    displayError('Your Opponent has left')
-    leaveRoom()
-})
-
-socket.on('SET_USERNAME', (username) => {
-    opponent = username
-    playerName2.innerHTML = opponent || 'Anonymous'
-})
-
 const leaveRoom = () => {
+    if (roomID === null) {
+        return
+    }
     socket.emit('LEAVE_ROOM')
     roomID   = null
     piece    = null
@@ -288,22 +291,41 @@ const copyToClipboard = () => {
     }
 }
 
-username = localStorage.getItem('username')
-if (username) {
-    nameInput.value = username
+const dark_toggle = () => {
+    var el1 = document.getElementById("dark-reader");
+    if(el1.disabled) {
+        el1.disabled = false;
+        localStorage.setItem("darkreader", "enabled");
+    } else {
+        el1.disabled = true;
+        localStorage.setItem("darkreader", "disabled");
+    }
 }
 
-continueBt.onclick = startGame
-newGameBt.onclick = newGame
-newRoomBt.onclick = newRoom
-joinRoomBt.onclick = joinRoom
-roomDisplay.onclick = copyToClipboard
-// playAgainBt.onclick = rematch
-goMenuBt.onclick = leaveRoom
-
-nameInput.addEventListener("keyup", (event) => {
-    if (event.keyCode === 13) {
-        event.preventDefault()
-        continueBt.click()
+const app = () => {
+    username = localStorage.getItem('username')
+    if (username && username !== 'Anonymous') {
+        nameInput.value = username
+        nameInput.selectionStart = nameInput.selectionEnd = 10
     }
-})
+
+    continueBt.onclick = startGame
+    newGameBt.onclick = newGame
+    newRoomBt.onclick = newRoom
+    joinRoomBt.onclick = joinRoom
+    roomDisplay.onclick = copyToClipboard
+    // playAgainBt.onclick = rematch
+    goMenuBt.onclick = leaveRoom
+
+    nameInput.addEventListener("keyup", (event) => {
+        if (event.keyCode === 13) {
+            event.preventDefault()
+            continueBt.click()
+        }
+    })
+
+    document.getElementById("title").onclick = leaveRoom
+    document.getElementById("title").style.cursor = "pointer"
+}
+
+app()

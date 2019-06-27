@@ -4,14 +4,25 @@
 	<title>tic tac toe</title>
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" type="text/css" href="/style/global.css">
-	<link rel="stylesheet" type="text/css" href="/style/style.css">
+	<link rel="stylesheet" type="text/css" href="/css/global.css">
+	<link rel="stylesheet" type="text/css" href="/css/style.css">
+	<link rel="stylesheet" type="text/css" href="/css/dark.css" id="dark-reader" disabled>
+	<script>
+		if (localStorage.getItem("darkreader") == "enabled") {
+			document.getElementById("dark-reader").disabled = false;
+		} else {
+			document.getElementById("dark-reader").disabled = true;
+		}
+	</script>
 </head>
 <body>
 	<div class="container">
 		<div class="container2">
 			<div id="mainTitle">
-				<h1>tic tac toe</h1>
+				<h1>
+					<span id="title" style="margin: 0">tac toe tac</span>
+					<a href="javascript:void(0)" onclick="dark_toggle();return false;" title="Toggle night mode">@</a>
+				</h1>
 			</div>
 			<label id="welcome">
 				<input id="nameInput" placeholder="Name" maxlength="8" autofocus>
