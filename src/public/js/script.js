@@ -78,7 +78,6 @@ const updateBoardUI = (x, y, p) => {
     }
     else {
         node.className = 'cross'
-        node.innerHTML = '&#215'
     }
     node.parentNode.onclick = false
 }

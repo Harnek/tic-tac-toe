@@ -156,19 +156,43 @@ td {
 }
 
 .cross {
-    font-size-adjust: 2.2;
-    color: rgb(119, 119, 119);
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cross::before,
+.cross::after {
+    position: absolute;
+    content: '';
+    width: 50%;
+    height: 7px;
+    background-color: rgb(119, 119, 119);
+}
+
+.cross::before {
+    transform: rotate(45deg);
+}
+
+.cross::after {
+    transform: rotate(-45deg);
+    background-color: royalblue;
 }
 
 .circle {
-    height: 40%;
-    width: 40%;
+    height: 50%;
+    width: 50%;
     margin: auto;
+    border: double 7px transparent;
     border-radius: 50%;
-    border-style: solid;
-    border-width: 7px;
-    border-color:rgb(119, 119, 119);
     background-color: rgba(0, 0, 0, 0);
+    background-image: linear-gradient(white, white), linear-gradient( 90deg, rgb(119, 119, 119) 50%, royalblue 50%);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
 }
 
 #roomDisplay {
