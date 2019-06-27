@@ -237,7 +237,11 @@ td {
     }
     #scoreboard {
         margin-top: 8%;
+        margin-bottom: 0%;
         flex-direction: row;
+    }
+    #errorDisplay {
+        margin: 0;
     }
 }
 
