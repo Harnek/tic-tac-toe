@@ -13,7 +13,7 @@ const playerScore1 = document.getElementById('playerScore1')
 const playerScore2 = document.getElementById('playerScore2')
 
 const newGameBt = document.getElementById('newGameBt')
-const createRoomBt = document.getElementById('createRoomBt')
+const newRoomBt = document.getElementById('createRoomBt')
 const joinRoomBt = document.getElementById('joinRoomBt')
 
 const roomDisplay = document.getElementById('roomDisplay')
@@ -33,39 +33,32 @@ let piece    = null
 let turn     = false
 let username = null
 let opponent = null
-let playerWins = 0
+let playerWins   = 0
 let opponentWins = 0
 let updating = false
-
-const displayError = (error) => {
-    errorDisplay.innerHTML = error
-    errorDisplay.style.visibility = 'visible'
-    setTimeout(() => {
-        errorDisplay.style.visibility = 'hidden'
-    }, 4000)
-}
+let localStorage = window.localStorage;
 
 const cleanUI = () => {
-    menu.style.display = 'none'
-    boardDisplay.style.display = 'none'
-    roomDisplay.style.display = 'none'
-    endScreen.style.display = 'none'
-    myProgress.style.display = 'none'
+    menu.style.display            = 'none'
+    boardDisplay.style.display    = 'none'
+    roomDisplay.style.display     = 'none'
+    endScreen.style.display       = 'none'
+    myProgress.style.display      = 'none'
     errorDisplay.style.visibility = 'hidden'
 }
 
 const createBoardUI = () => {
-    username = nameInput.value || 'Anonymous'
-    playerName1.innerHTML = username
-    playerName2.innerHTML = opponent || 'Opponent'
+    cleanUI()
+    playerName1.innerHTML  = username
+    playerName2.innerHTML  = opponent || 'wait...'
     playerScore1.innerHTML = playerWins
     playerScore2.innerHTML = opponentWins
 
     for (var i = 0; i < board.rows.length; i++) {
         for (var j = 0; j < board.rows[i].cells.length; j++) {
             board.rows[i].cells[j].innerHTML = '<div></div>'
-            board.rows[i].cells[j].onclick = function (pos) {
-                update(pos);
+            board.rows[i].cells[j].onclick = function (el) {
+                update(el);
             }
             if (i < 2) {
                 board.rows[i].cells[j].style.borderBottom = "1px solid black"
@@ -102,30 +95,27 @@ const createMenuUI = () => {
             console.log("CALLED")
             menu.style.display = 'block'
         } else {
-            width++;
+            width += 5;
             myBar.style.width = width + '%';
         }
     }
 
     myProgress.style.display = 'block'
-    var id = setInterval(frame, 3);
-}
-
-const copyToClipboard = () => {
-    roomDisplay.select();
-    if (document.execCommand('copy')){
-        roomDisplay.selectionStart = roomDisplay.selectionEnd;
-        // $('.error').stop().fadeIn(400).delay(3000).fadeOut(400);
-    }
+    var id = setInterval(frame, 1);
 }
 
 const startGame = () => {
+    username = nameInput.value || 'Anonymous'
     continueBt.parentNode.style.display = 'none'
+    localStorage.setItem('username', username)
     createMenuUI()
 }
 
 const newGame = () => {
-    socket.emit('NEW_GAME', null, (error, data) => {
+    const info = {
+        username
+    }
+    socket.emit('NEW_GAME', info, (error, data) => {
         if (error) {
             alert(error)
         }
@@ -135,14 +125,16 @@ const newGame = () => {
             piece = data.piece
             turn = data.turn
 
-            cleanUI()
             createBoardUI()   
         }
     })
 }
 
-const createRoom = () => {
-    socket.emit('CREATE_ROOM', null, (error, data) => {
+const newRoom = () => {
+    const info = {
+        username
+    }
+    socket.emit('NEW_ROOM', info, (error, data) => {
         if (error) {
             displayError(error)
         }else{
@@ -151,7 +143,6 @@ const createRoom = () => {
             piece = data.piece
             turn = data.turn
 
-            cleanUI()
             createBoardUI()
             roomDisplay.value = roomID
             roomDisplay.style.display = 'block'
@@ -160,8 +151,9 @@ const createRoom = () => {
 }
 
 const joinRoom = () => {
-    let input = prompt("Enter Room Id: ", "")
+    const input = prompt("Enter Room Id: ", "")
     const info = {
+        username,
         roomID: input
     }
 
@@ -169,18 +161,17 @@ const joinRoom = () => {
         if (error) {
             displayError(error)
         }else{
-            roomID = data.roomID
+            roomID = input
             playerId = data.playerId
             piece = data.piece
             turn = data.turn
 
-            cleanUI()
             createBoardUI()
         }
     })
 }
 
-const update = (pos) => {
+const update = (el) => {
     errorDisplay.style.visibility = 'hidden'
 
     if (updating === true){
@@ -195,49 +186,34 @@ const update = (pos) => {
     const data = {
         roomID,
         piece,
-        x: pos.target.parentNode.rowIndex,
-        y: pos.target.cellIndex
+        x: el.target.parentNode.rowIndex,
+        y: el.target.cellIndex
     }
+
+    console.log(data)
 
     socket.emit('UPDATE', data)
 }
 
-socket.on('PLAYER_JOINED', () => {
-    displayError('Player 2 has joined')
-    socket.emit('GET_USERNAME', {roomID, username});
-    roomDisplay.style.display = 'none'
-})
-
-socket.on('PLAYER_LEFT', () => {
-    console.log("Player 2 Left")
-    displayError('Your Opponent has left')
-    leaveRoom()
-})
-
-socket.on('SET_USERNAME', (data) => {
-    opponent = data
-    playerName2.innerHTML = opponent || 'Anonymous'
-})
-
-socket.on('UPDATED', (status) => {
+socket.on('UPDATED', (data) => {
     errorDisplay.style.visibility = 'hidden'
 
-    console.log(status)
+    console.log(data)
 
-    if (status.error) {
-        displayError(status.error)
+    if (data.error) {
+        displayError(data.error)
     }
     else {
-        updateBoardUI(status.x, status.y, status.piece)
+        updateBoardUI(data.x, data.y, data.piece)
 
-        if (piece !== status.piece) {
+        if (piece !== data.piece) {
             turn = true
         }else{
             turn = false
         }
 
-        if (status.state !== null && status.state !== 0){
-            return gameEnd(status.state, status.piece)
+        if (data.state !== null && data.state !== 0){
+            gameEnd(data.state, data.piece)
         }
     }
     updating = false
@@ -251,46 +227,78 @@ const gameEnd = (state, p) => {
         if (piece === p) {
             msg = 'You Won'
             playerWins += 1
+            turn = true
         }
         else {
             msg = 'You Lose'
             opponentWins += 1
+            turn = false
         }
     }
-    
-    cleanUI()
-    statusDisplay.innerHTML = msg
-    endScreen.style.display = 'flex'
+
+    //TODO: Display status message
+    socket.emit('REMATCH')
+    createBoardUI()
+    displayError(msg)
+    console.log("Turn", turn)
 }
 
-const rematch = () => {
-    let status = {
-        roomID
-    }
-    socket.emit('REMATCH', status)
-    cleanUI()
-    createBoardUI()
-    console.log(turn)
-}
+socket.on('PLAYER_JOINED', () => {
+    displayError('Player 2 joined')
+    socket.emit('GET_USERNAME');
+    roomDisplay.style.display = 'none'
+})
+
+socket.on('PLAYER_LEFT', () => {
+    console.log("Player 2 Left")
+    displayError('Your Opponent has left')
+    leaveRoom()
+})
+
+socket.on('SET_USERNAME', (username) => {
+    opponent = username
+    playerName2.innerHTML = opponent || 'Anonymous'
+})
 
 const leaveRoom = () => {
-    socket.emit('LEAVE_ROOM', {roomID})
+    socket.emit('LEAVE_ROOM')
     roomID   = null
     piece    = null
     turn     = false
     opponent = null
-    playerWins = 0
+    playerWins   = 0
     opponentWins = 0
     updating = false
     createMenuUI()
 }
 
+const displayError = (error) => {
+    errorDisplay.innerHTML = error
+    errorDisplay.style.visibility = 'visible'
+    setTimeout(() => {
+        errorDisplay.style.visibility = 'hidden'
+    }, 4000)
+}
+
+const copyToClipboard = () => {
+    roomDisplay.select();
+    if (document.execCommand('copy')){
+        roomDisplay.selectionStart = roomDisplay.selectionEnd;
+        // $('.error').stop().fadeIn(400).delay(3000).fadeOut(400);
+    }
+}
+
+username = localStorage.getItem('username')
+if (username) {
+    nameInput.value = username
+}
+
 continueBt.onclick = startGame
 newGameBt.onclick = newGame
-createRoomBt.onclick = createRoom
+newRoomBt.onclick = newRoom
 joinRoomBt.onclick = joinRoom
 roomDisplay.onclick = copyToClipboard
-playAgainBt.onclick = rematch
+// playAgainBt.onclick = rematch
 goMenuBt.onclick = leaveRoom
 
 nameInput.addEventListener("keyup", (event) => {

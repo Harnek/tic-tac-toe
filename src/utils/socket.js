@@ -27,9 +27,12 @@ module.exports = function(server){
                 waitingRooms.push(status.roomID)
                 boards[status.roomID] = new Board;
             }
+
             socket.join(status.roomID)
-    
-            const clients = clientsConnected(io, status.roomID)
+            socket.roomID = status.roomID
+            socket.username = data.username
+            
+            const clients = clientsConnected(io, socket.roomID)
             callback(null, status)
 
             if (clients === 2){
@@ -39,8 +42,8 @@ module.exports = function(server){
             console.log(`Player joined room: ${status.roomID}`)
         })
     
-        socket.on('CREATE_ROOM', (data, callback) => {
-            const roomID = generateRoomID()
+        socket.on('NEW_ROOM', (data, callback) => {
+            let roomID = generateRoomID()
             let status = {
                 roomID,
                 playerID: generatePlayerID(),
@@ -48,9 +51,13 @@ module.exports = function(server){
                 turn: true,
                 status: null
             }
+            
             boards[roomID] = new Board()
             waitingRooms.push(roomID)
+
             socket.join(roomID)
+            socket.roomID = roomID
+            socket.username = data.username
             callback(null, status)
         })
     
@@ -62,34 +69,28 @@ module.exports = function(server){
             if (clients === 2) {
                 return callback('Game Full')
             }
-            
+
             let status = {
-                roomID: data.roomID,
                 playerID: generatePlayerID(),
                 piece: 0,
                 turn: false
             }
     
             leftWaitingRoom(data.roomID)
-    
             socket.join(data.roomID)
+            socket.roomID = data.roomID
+            socket.username = data.username
+
             callback(null, status)
 
-            io.in(data.roomID).emit('PLAYER_JOINED')
-        })
-
-        socket.on('LEAVE_ROOM', (data) => {
-            socket.to(data.roomID).emit('PLAYER_LEFT')
-            socket.leave(data.roomID)
-            delete boards[roomID]
+            io.in(socket.roomID).emit('PLAYER_JOINED')
         })
         
-        socket.on('GET_USERNAME', (data, callback) => {
-            console.log(data.username)
-            socket.to(data.roomID).emit('SET_USERNAME', data.username)
+        socket.on('GET_USERNAME', () => {
+            socket.to(socket.roomID).emit('SET_USERNAME', socket.username)
         })
 
-        socket.on('UPDATE', (data, callback) => {
+        socket.on('UPDATE', (data) => {
             let status = {
                 error: null,
                 piece: data.piece,
@@ -98,38 +99,41 @@ module.exports = function(server){
                 y: data.y
             }
     
-            const clients = clientsConnected(io, data.roomID)
-    
+            const clients = clientsConnected(io, socket.roomID)
+
             if (clients === 0) {
                 status.error = 'Invalid Game. Please Restart'
             }
             else if (clients < 2) {
                 status.error = 'Second player has not joined'
             }
-            else if ( boards[data.roomID].update(data.x, data.y, data.piece) ) {
-                status.state = boards[data.roomID].getState()
+            else if ( boards[socket.roomID].update(data.x, data.y, data.piece) ) {
+                status.state = boards[socket.roomID].getState()
             }
             else {
                 status.error = 'Invalid Move'
             }
     
-            io.to(data.roomID).emit('UPDATED', status)
+            io.to(socket.roomID).emit('UPDATED', status)
         })
     
-        socket.on('REMATCH', (data) => {
-            boards[data.roomID].reset()
+        socket.on('REMATCH', () => {
+            boards[socket.roomID].reset()
         })
 
-        socket.on('disconnecting', () => {
-            for (roomID in socket.rooms){
-                if (roomID.length === 5){
-                    leftWaitingRoom(roomID)
-                    socket.to(roomID).emit('PLAYER_LEFT')
-                    delete boards[roomID]
+        socket.on('LEAVE_ROOM', () => {
+            socket.to(socket.roomID).emit('PLAYER_LEFT')
+            socket.leave(socket.roomID)
+            delete boards[socket.roomID]
+            socket.roomID = null
+        })
 
-                    console.log(`Player left room: ${roomID}`)
-                }
-            }
+        socket.on('disconnect', () => {
+            leftWaitingRoom(socket.roomID)
+            socket.to(socket.roomID).emit('PLAYER_LEFT')
+            delete boards[socket.roomID]
+            console.log(`Player left room: ${socket.roomID}`)
+            socket.roomID = null
         })
     });
 
