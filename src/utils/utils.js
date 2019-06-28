@@ -10,7 +10,7 @@ module.exports.generatePlayerID = () => {
     return playerID++;
 }
 
-module.exports.leftWaitingRoom = (roomID) => {
+module.exports.leaveWaitingRoom = (roomID) => {
     for (var i = 0; i < waitingRooms.length; i++) {
         if (waitingRooms[i] === roomID){
             return waitingRooms.splice(i, 1)[0]

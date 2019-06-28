@@ -1,13 +1,13 @@
 const Board = require('./board')
 const { boards, waitingRooms } = require('../config/config')
-const { generateRoomID, generatePlayerID, leftWaitingRoom, clientsConnected } = require('./utils')
+const { generateRoomID, generatePlayerID, leaveWaitingRoom, clientsConnected } = require('./utils')
 
 module.exports = function(server){
 
     var io = require("socket.io")(server);
     
     io.on('connection', function(socket) {
-        socket.on('NEW_GAME', (data, callback) => {
+        socket.on('new game', (data, callback) => {
             let status = {
                 roomID: null,
                 playerID: generatePlayerID(),
@@ -36,13 +36,13 @@ module.exports = function(server){
             callback(null, status)
 
             if (clients === 2){
-                io.in(status.roomID).emit('PLAYER_JOINED')
+                io.in(status.roomID).emit('join game')
             }
         
             console.log(`Player joined room: ${status.roomID}`)
         })
     
-        socket.on('NEW_ROOM', (data, callback) => {
+        socket.on('new room', (data, callback) => {
             let roomID = generateRoomID()
             let status = {
                 roomID,
@@ -61,7 +61,7 @@ module.exports = function(server){
             callback(null, status)
         })
     
-        socket.on('JOIN_ROOM', (data, callback) => {
+        socket.on('join room', (data, callback) => {
             let clients = clientsConnected(io, data.roomID)
             if (clients === 0) {
                 return callback('Invalid Game')
@@ -76,21 +76,21 @@ module.exports = function(server){
                 turn: false
             }
     
-            leftWaitingRoom(data.roomID)
+            leaveWaitingRoom(data.roomID)
             socket.join(data.roomID)
             socket.roomID = data.roomID
             socket.username = data.username
 
             callback(null, status)
 
-            io.in(socket.roomID).emit('PLAYER_JOINED')
+            io.in(socket.roomID).emit('join game')
         })
         
-        socket.on('GET_USERNAME', () => {
-            socket.to(socket.roomID).emit('SET_USERNAME', socket.username)
+        socket.on('username', () => {
+            socket.to(socket.roomID).emit('username', socket.username)
         })
 
-        socket.on('UPDATE', (data) => {
+        socket.on('move', (data) => {
             let status = {
                 error: null,
                 piece: data.piece,
@@ -101,36 +101,30 @@ module.exports = function(server){
     
             const clients = clientsConnected(io, socket.roomID)
 
-            if (clients === 0) {
-                status.error = 'Invalid Game. Please Restart'
-            }
-            else if (clients < 2) {
-                status.error = 'Second player has not joined'
-            }
-            else if ( boards[socket.roomID].update(data.x, data.y, data.piece) ) {
+            if ( boards[socket.roomID].update(data.x, data.y, data.piece) ) {
                 status.state = boards[socket.roomID].getState()
             }
             else {
                 status.error = 'Invalid Move'
             }
     
-            io.to(socket.roomID).emit('UPDATED', status)
+            io.to(socket.roomID).emit('update', status)
         })
     
-        socket.on('REMATCH', () => {
+        socket.on('rematch', () => {
             boards[socket.roomID].reset()
         })
 
-        socket.on('LEAVE_ROOM', () => {
-            socket.to(socket.roomID).emit('PLAYER_LEFT')
+        socket.on('leave game', () => {
+            socket.to(socket.roomID).emit('leave game')
             socket.leave(socket.roomID)
             delete boards[socket.roomID]
             socket.roomID = null
         })
 
         socket.on('disconnect', () => {
-            leftWaitingRoom(socket.roomID)
-            socket.to(socket.roomID).emit('PLAYER_LEFT')
+            leaveWaitingRoom(socket.roomID)
+            socket.to(socket.roomID).emit('leave game')
             delete boards[socket.roomID]
             console.log(`Player left room: ${socket.roomID}`)
             socket.roomID = null

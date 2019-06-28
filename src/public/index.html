@@ -6,79 +6,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="/css/global.css">
 	<link rel="stylesheet" type="text/css" href="/css/style.css">
-	<link rel="stylesheet" type="text/css" href="/css/dark.css" id="dark-reader" disabled>
+	<!-- <link rel="stylesheet" type="text/css" href="/css/dark.css" id="dark-reader" disabled>
 	<script>
 		if (localStorage.getItem("darkreader") == "enabled") {
 			document.getElementById("dark-reader").disabled = false;
 		} else {
 			document.getElementById("dark-reader").disabled = true;
 		}
-	</script>
+	</script> -->
 </head>
 <body>
 	<div class="container">
-		<div class="container2">
-			<div id="mainTitle">
+		<div class="container-2">
+			<div id="header">
 				<h1>
 					<span id="title" style="margin: 0">tac toe tac</span>
-					<a href="javascript:void(0)" onclick="dark_toggle();return false;" title="Toggle night mode">@</a>
+					<!-- <a href="javascript:void(0)" onclick="dark_toggle();return false;" title="Toggle night mode">@</a> -->
 				</h1>
 			</div>
-			<label id="welcome">
+			<label id="intro">
 				<input id="nameInput" placeholder="Name" maxlength="8" autofocus>
 				<div class="button" id="continueBt">Continue</div>
-			</label>
-			<div class="container3" id="boardDisplay">
-				<div id="adjust"></div>
-				<div>
-					<table id="board">
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-					</table>
-				</div>
-				<div id="scoreboard" class="container3">
-					<div>
-						<div id="playerName1"></div>
-						<div id="playerScore1" width="100%">0</div>
-					</div>
-					<div>
-						<div id="playerName2"></div>
-						<div id="playerScore2" width="100%">0</div>
-					</div>
-				</div>
-			</div>
-				
+            </label>
+            
 			<div id="menu">
 				<div id="newGameBt" class="button">new game</div>
-				<div id="createRoomBt" class="button">create room</div>
+				<div id="newRoomBt" class="button">create room</div>
 				<div id="joinRoomBt" class="button">join room</div>
 			</div>
 
-			<div id="endScreen" class="container3">
-					<div id="statusDisplay"></div>
-					<div id="playAgainBt" class="button">play again</div>
-					<div id="goMenuBt" class="button">go to menu</div>
+			<div id="game" class="container-3" style="display: none">
+				<div id="adjust"></div>
+				<div id="board"></div>
+				<div id="scoreboard" class="container-3">
+					<div>
+						<div id="playerA"></div>
+						<div id="playerAWins" width="100%">0</div>
+					</div>
+					<div>
+						<div id="playerB"></div>
+						<div id="playerBWins" width="100%">0</div>
+					</div>
+				</div>
 			</div>
 
-			<input id="roomDisplay" readonly>
-			<div id="myProgress">
-				<div id="myBar"></div>
-			</div>
-
-			<div id="errorDisplay">Error:</div>
+			<input id="room" readonly>
+			<div id="message">Error:</div>
 		</div>
 	</div>
 
@@ -86,3 +59,4 @@
 	<script src="js/script.js"></script>
   </body>
 </html>
+<!doctype html>

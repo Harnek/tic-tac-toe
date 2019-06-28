@@ -1,330 +1,268 @@
 const socket = io();
 
-const nameInput = document.getElementById('nameInput')
-const continueBt = document.getElementById('continueBt')
+const App = {
+    room: null,
+    playerA: null,
+    playerB: null,
+    playerAWins: 0,
+    playerBWins: 0,
+    piece: null,
+    turn: null,
+    updating: false,
+    msgID: null,
+    store: window.localStorage,
 
-const menu = document.getElementById('menu')
+    init: () => {
+        App.attachListeners()
 
-const board = document.getElementById('board')
-const boardDisplay = document.getElementById('boardDisplay')
-const playerName1 = document.getElementById('playerName1')
-const playerName2 = document.getElementById('playerName2')
-const playerScore1 = document.getElementById('playerScore1')
-const playerScore2 = document.getElementById('playerScore2')
-
-const newGameBt = document.getElementById('newGameBt')
-const newRoomBt = document.getElementById('createRoomBt')
-const joinRoomBt = document.getElementById('joinRoomBt')
-
-const roomDisplay = document.getElementById('roomDisplay')
-
-const endScreen = document.getElementById('endScreen')
-const statusDisplay = document.getElementById('statusDisplay')
-const playAgainBt = document.getElementById('playAgainBt')
-const goMenuBt = document.getElementById('goMenuBt')
-
-const myProgress = document.getElementById('myProgress')
-const myBar = document.getElementById('myBar')
-const errorDisplay = document.getElementById('errorDisplay')
-
-let roomID   = null
-let playerId = null
-let piece    = null
-let turn     = false
-let username = null
-let opponent = null
-let playerWins   = 0
-let opponentWins = 0
-let updating = false
-let localStorage = window.localStorage;
-
-const cleanUI = () => {
-    menu.style.display            = 'none'
-    boardDisplay.style.display    = 'none'
-    roomDisplay.style.display     = 'none'
-    endScreen.style.display       = 'none'
-    myProgress.style.display      = 'none'
-    errorDisplay.style.visibility = 'hidden'
-}
-
-const createBoardUI = () => {
-    cleanUI()
-    playerName1.innerHTML  = username
-    playerName2.innerHTML  = opponent || 'wait...'
-    playerScore1.innerHTML = playerWins
-    playerScore2.innerHTML = opponentWins
-
-    for (var i = 0; i < board.rows.length; i++) {
-        for (var j = 0; j < board.rows[i].cells.length; j++) {
-            board.rows[i].cells[j].innerHTML = '<div></div>'
-            board.rows[i].cells[j].onclick = function (el) {
-                update(el);
-            }
-            if (i < 2) {
-                board.rows[i].cells[j].style.borderBottom = "1px solid black"
-            }
-            if (j < 2) {
-                board.rows[i].cells[j].style.borderRight = "1px solid black"
-            }
+        if (App.store.getItem('username')){
+            App.playerA = App.store.getItem('username')
+            App.getEl('intro').style.display = 'none'
+            App.menu()
         }
-    }
-    boardDisplay.style.display = 'flex';
-}
-
-const updateBoardUI = (x, y, p) => {
-    const node = board.rows[x].cells[y].firstChild
-    if (p === 0){
-        node.className = 'circle'
-    }
-    else {
-        node.className = 'cross'
-    }
-    node.parentNode.onclick = false
-}
-
-const createMenuUI = () => {
-    opponent = null
-    let width = 1
-
-    frame = () => {
-        if (width >= 100) {
-            clearInterval(id);
-
-            cleanUI()
-            console.log("CALLED")
-            menu.style.display = 'block'
-        } else {
-            width += 5;
-            myBar.style.width = width + '%';
-        }
-    }
-
-    myProgress.style.display = 'block'
-    var id = setInterval(frame, 1);
-}
-
-const startGame = () => {
-    username = nameInput.value || 'Anonymous'
-    continueBt.parentNode.style.display = 'none'
-    localStorage.setItem('username', username)
-    createMenuUI()
-}
-
-const newGame = () => {
-    const info = {
-        username
-    }
-    socket.emit('NEW_GAME', info, (error, data) => {
-        if (error) {
-            alert(error)
-        }
-        else{
-            roomID = data.roomID
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            createBoardUI()   
-        }
-    })
-}
-
-const newRoom = () => {
-    const info = {
-        username
-    }
-    socket.emit('NEW_ROOM', info, (error, data) => {
-        if (error) {
-            displayError(error)
+    },
+    
+    intro: () => {
+        App.playerA = App.getEl('nameInput').value
+        if (App.playerA === '') {
+            App.playerA = 'A'
         }else{
-            roomID = data.roomID
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            createBoardUI()
-            roomDisplay.value = roomID
-            roomDisplay.style.display = 'block'
-        }
-    })
-}
-
-const joinRoom = () => {
-    const input = prompt("Enter Room Id: ", "")
-    const info = {
-        username,
-        roomID: input
-    }
-
-    socket.emit('JOIN_ROOM', info, (error, data) => {
-        if (error) {
-            displayError(error)
-        }else{
-            roomID = input
-            playerId = data.playerId
-            piece = data.piece
-            turn = data.turn
-
-            createBoardUI()
-        }
-    })
-}
-
-const update = (el) => {
-    errorDisplay.style.visibility = 'hidden'
-
-    if (updating === true){
-        return
-    }
-
-    if (turn === false){
-        return displayError('Opponent\'s turn')
-    }
-    updating = true
-
-    const data = {
-        roomID,
-        piece,
-        x: el.target.parentNode.rowIndex,
-        y: el.target.cellIndex
-    }
-
-    console.log(data)
-
-    socket.emit('UPDATE', data)
-}
-
-socket.on('UPDATED', (data) => {
-    errorDisplay.style.visibility = 'hidden'
-
-    console.log(data)
-
-    if (data.error) {
-        displayError(data.error)
-    }
-    else {
-        updateBoardUI(data.x, data.y, data.piece)
-
-        if (piece !== data.piece) {
-            turn = true
-        }else{
-            turn = false
+            App.store.setItem('username', App.playerA)
         }
 
-        if (data.state !== null && data.state !== 0){
-            gameEnd(data.state, data.piece)
+        App.getEl('intro').style.display = 'none'
+        App.menu()
+    },
+
+    menu: () => {
+        App.getEl('game').style.display = 'none'
+        App.getEl('menu').style.display = 'block'
+    },
+
+    game: () => {
+        const info = {username: App.playerA}
+
+        socket.emit('new game', info, (error, data) => {
+            App.room  = data.roomID
+            App.piece = data.piece
+            App.turn  = data.turn
+            
+            App.create()
+            App.notify('Wait for player')
+        })
+    },
+    
+    room: () => {
+        const info = {name: App.playerA}
+
+        socket.emit('new room', info, (error, data) => {
+            App.room  = data.roomID
+            App.piece = data.piece
+            App.turn  = data.turn
+        
+            App.create()
+            App.getEl('room').value = App.room
+            App.getEl('room').style.display = 'block'
+        })
+    },
+
+    join: () => {
+        const input = prompt("Enter Room Id: ", "")
+        const info = {name: App.playerA, roomID: input}
+
+        socket.emit('join room', info, (error, data) => {
+            App.room  = data.roomID
+            App.piece = data.piece
+            App.turn  = data.turn
+        
+            App.create()
+        })
+    },
+
+    leave: () => {
+
+    },
+
+    create: () => {
+        App.getEl('menu').style.display = 'none'
+
+        const board = App.getEl('board')
+        board.innerHTML = ''
+
+        const table = document.createElement('table')
+        for (let i = 0; i < 3; i++) {
+            let row = document.createElement('tr')
+            for (let j = 0; j < 3; j++) {
+                let col = document.createElement('td')
+                let div = document.createElement('div')
+                col.onclick = (el) => App.move(el)
+
+                if (i < 2) {
+                    col.style.borderBottom = "1px solid black"
+                }
+                if (j < 2) {
+                    col.style.borderRight = "1px solid black"
+                }
+
+                col.appendChild(div)
+                row.appendChild(col)
+            }
+            table.appendChild(row)
         }
-    }
-    updating = false
-    console.log("Turn", turn)
-});
+        board.appendChild(table)
 
-socket.on('PLAYER_JOINED', () => {
-    displayError('Player 2 joined')
-    socket.emit('GET_USERNAME');
-    roomDisplay.style.display = 'none'
-})
+        App.getEl('playerA').innerHTML = App.playerA
+        App.getEl('playerB').innerHTML = App.playerB || 'B'
+        App.getEl('playerAWins').innerHTML = App.playerAWins
+        App.getEl('playerBWins').innerHTML = App.playerBWins
 
-socket.on('PLAYER_LEFT', () => {
-    console.log("Player 2 Left")
-    displayError('Your Opponent has left')
-    leaveRoom()
-})
+        App.getEl('game').style.display = 'flex'
+    },
 
-socket.on('SET_USERNAME', (username) => {
-    opponent = username
-    playerName2.innerHTML = opponent || 'Anonymous'
-})
+    move: (el) => {
+        if (App.updating === true) {
+            return
+        }
+        if (App.turn === false){
+            return App.notify('Opponent\'s turn')
+        }
+        if (App.playerB === null) {
+            return App.notify('Second player has not joined')
+        }
+        clearInterval(App.msgID)
 
-const gameEnd = (state, p) => {
-    let msg = 'Game Draw'
+        App.updating = true
+        const data = {
+            piece: App.piece,
+            x: el.target.parentNode.rowIndex,
+            y: el.target.cellIndex
+        }
 
-    if (state === 1) {
-        if (piece === p) {
-            msg = 'You Won'
-            playerWins += 1
-            turn = true
+        socket.emit('move', data)
+        App.turn = false
+    },
+
+    update: (x, y, piece, state) => {
+        const board = App.getEl('board').firstChild
+        const el = board.rows[x].cells[y].firstChild
+        if (piece === 0){
+            el.className = 'circle'
         }
         else {
-            msg = 'You Lose'
-            opponentWins += 1
-            turn = false
+            el.className = 'cross'
         }
-    }
+        el.parentNode.onclick = null
 
-    //TODO: Display status message
-    socket.emit('REMATCH')
-    createBoardUI()
-    displayError(msg)
-    console.log("Turn", turn)
-}
-
-const leaveRoom = () => {
-    if (roomID === null) {
-        return
-    }
-    socket.emit('LEAVE_ROOM')
-    roomID   = null
-    piece    = null
-    turn     = false
-    opponent = null
-    playerWins   = 0
-    opponentWins = 0
-    updating = false
-    createMenuUI()
-}
-
-const displayError = (error) => {
-    errorDisplay.innerHTML = error
-    errorDisplay.style.visibility = 'visible'
-    setTimeout(() => {
-        errorDisplay.style.visibility = 'hidden'
-    }, 4000)
-}
-
-const copyToClipboard = () => {
-    roomDisplay.select();
-    if (document.execCommand('copy')){
-        roomDisplay.selectionStart = roomDisplay.selectionEnd;
-        // $('.error').stop().fadeIn(400).delay(3000).fadeOut(400);
-    }
-}
-
-const dark_toggle = () => {
-    var el1 = document.getElementById("dark-reader");
-    if(el1.disabled) {
-        el1.disabled = false;
-        localStorage.setItem("darkreader", "enabled");
-    } else {
-        el1.disabled = true;
-        localStorage.setItem("darkreader", "disabled");
-    }
-}
-
-const app = () => {
-    username = localStorage.getItem('username')
-    if (username && username !== 'Anonymous') {
-        nameInput.value = username
-        nameInput.selectionStart = nameInput.selectionEnd = 10
-    }
-
-    continueBt.onclick = startGame
-    newGameBt.onclick = newGame
-    newRoomBt.onclick = newRoom
-    joinRoomBt.onclick = joinRoom
-    roomDisplay.onclick = copyToClipboard
-    // playAgainBt.onclick = rematch
-    goMenuBt.onclick = leaveRoom
-
-    nameInput.addEventListener("keyup", (event) => {
-        if (event.keyCode === 13) {
-            event.preventDefault()
-            continueBt.click()
+        if (App.turn === false) {
+            App.turn = true
         }
-    })
 
-    document.getElementById("title").onclick = leaveRoom
-    document.getElementById("title").style.cursor = "pointer"
+        if (state !== null && state !== 0){
+            App.over(piece, state)
+        }
+
+        App.updating = false
+    },
+
+    over: (piece, state) => {
+        if (App.piece === piece) {
+            App.turn = true
+            App.playerAWins += 1
+            App.notify('You Won')
+        }
+        else{
+            App.turn = false
+            App.playerBWins += 1
+            App.notify('You Lose')
+        }
+
+        socket.emit('rematch')
+        App.create()
+    },
+
+    reset: () => {
+        App.room = null
+        App.playerB = null
+        App.playerAWins = 0
+        App.playerBWins = 0
+        App.piece = null
+        App.turn = null
+        App.updating = false
+
+        App.menu()
+    },
+
+    notify: (msg) => {
+        clearInterval(App.msgID)
+        const el = App.getEl('message')
+        el.innerHTML = msg
+        el.style.visibility = 'visible'
+
+        setTimeout(() => {
+            App.msgID = el.style.visibility = 'hidden'
+        }, 1500)
+    },
+
+    attachListeners: () => {
+        App.getEl('continueBt').onclick = App.intro
+        App.getEl('newGameBt').onclick  = App.game
+        App.getEl('newRoomBt').onclick  = App.room
+        App.getEl('joinRoomBt').onclick = App.join
+        App.getEl('title').onclick      = App.reset
+        App.getEl('title').style.cursor = 'pointer'
+
+        App.getEl('room').onclick = (el) => {
+            el.target.select();
+            if (document.execCommand('copy')){
+                el.target.selectionStart = el.target.selectionEnd;
+            }
+        }
+
+        App.getEl('nameInput').addEventListener('keyup', (event) => {
+            if (event.keyCode === 13) {
+                event.preventDefault()
+                App.getEl('continueBt').click()
+            }
+        })
+    },
+
+    getEl: (id) => {
+        return document.getElementById(id);
+    },
 }
 
-app()
+
+socket.on('update', (data) => {
+    App.update(data.x, data.y, data.piece, data.state)
+});
+
+socket.on('join game', () => {
+    App.playerB = 'B'
+    App.notify('Player has joined')
+    socket.emit('username');
+    App.getEl('room').style.display = 'none'
+})
+
+socket.on('leave game', () => {
+    App.notify('Player has left')
+    App.reset()
+})
+
+socket.on('username', (username) => {
+    App.playerB = username || 'B'
+    App.getEl('playerB').innerHTML = App.playerB
+})
+
+App.init()
+
+
+// const dark_toggle = () => {
+//     var el1 = document.getElementById("dark-reader");
+//     if(el1.disabled) {
+//         el1.disabled = false;
+//         localStorage.setItem("darkreader", "enabled");
+//     } else {
+//         el1.disabled = true;
+//         localStorage.setItem("darkreader", "disabled");
+//     }
+// }
