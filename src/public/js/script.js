@@ -134,6 +134,8 @@ const App = {
         clearInterval(App.msgID)
 
         App.updating = true
+        App.turn = false
+
         const data = {
             piece: App.piece,
             x: el.target.parentNode.rowIndex,
@@ -141,7 +143,6 @@ const App = {
         }
 
         socket.emit('move', data)
-        App.turn = false
     },
 
     update: (x, y, piece, state) => {
@@ -155,7 +156,7 @@ const App = {
         }
         el.parentNode.onclick = null
 
-        if (App.turn === false) {
+        if (App.piece !== piece) {
             App.turn = true
         }
 
