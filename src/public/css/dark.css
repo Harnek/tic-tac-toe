@@ -47,11 +47,11 @@ a:not([style*="color:"]):hover {
 a:not([style*="color:"]):active, a:not([style*="color:"]):focus {
     color: rgb(155, 203, 230) !important;
 }
-/* :not([style*="border-color:"]),
+:not([style*="border-color:"]),
 ::before,
 ::after {
     border-color: rgb(80, 115, 134) !important;
-} */
+}
 div:empty {
     background-color: rgb(16, 20, 23) !important;
 }
@@ -66,4 +66,8 @@ textarea:not([style*="background-image:"]) {
 
 td {
     border-color: rgb(80, 115, 134) !important;
+}
+
+table {
+    border-collapse: inherit;
 }

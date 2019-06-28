@@ -80,7 +80,9 @@ const App = {
     },
 
     leave: () => {
-
+        if (App.roomID !== null) {
+            socket.emit('leave game')
+        }
     },
 
     create: () => {
@@ -98,10 +100,10 @@ const App = {
                 col.onclick = (el) => App.move(el)
 
                 if (i < 2) {
-                    col.style.borderBottom = "1px solid black"
+                    col.classList.add('borderBt')
                 }
                 if (j < 2) {
-                    col.style.borderRight = "1px solid black"
+                    col.classList.add('borderRt')
                 }
 
                 col.appendChild(div)
@@ -181,6 +183,8 @@ const App = {
     },
 
     reset: () => {
+        App.leave()
+
         App.room = null
         App.playerB = null
         App.playerAWins = 0
@@ -210,6 +214,7 @@ const App = {
         App.getEl('joinRoomBt').onclick = App.join
         App.getEl('title').onclick      = App.reset
         App.getEl('title').style.cursor = 'pointer'
+        App.getEl('darkBt').onclick = App.dark
 
         App.getEl('room').onclick = (el) => {
             el.target.select();
@@ -227,8 +232,21 @@ const App = {
     },
 
     getEl: (id) => {
-        return document.getElementById(id);
+        return document.getElementById(id)
     },
+
+    dark: () => {
+        var el = App.getEl("dark-reader")
+        if(el.disabled) {
+            el.disabled = false
+            App.store.setItem("darkreader", "enabled")
+            App.getEl('darkBt').innerHTML = '🌞'
+        } else {
+            el.disabled = true
+            App.store.setItem("darkreader", "disabled")
+            App.getEl('darkBt').innerHTML = '🌙'
+        }
+    }
 }
 
 
@@ -254,15 +272,3 @@ socket.on('username', (username) => {
 })
 
 App.init()
-
-
-// const dark_toggle = () => {
-//     var el1 = document.getElementById("dark-reader");
-//     if(el1.disabled) {
-//         el1.disabled = false;
-//         localStorage.setItem("darkreader", "enabled");
-//     } else {
-//         el1.disabled = true;
-//         localStorage.setItem("darkreader", "disabled");
-//     }
-// }

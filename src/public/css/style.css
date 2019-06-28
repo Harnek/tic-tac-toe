@@ -137,6 +137,14 @@ td {
     min-width: 100px;
 }
 
+.borderBt{
+    border-bottom: 1px solid black;
+}
+
+.borderRt{
+    border-right: 1px solid black;
+}
+
 .cross {
     position: relative;
     height: 100%;
