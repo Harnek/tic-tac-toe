@@ -71,3 +71,12 @@ td {
 table {
     border-collapse: inherit;
 }
+
+.cross::after, .cross::before{
+    background-color: rgb(80, 115, 134) !important;
+}
+
+.circle {
+    background-image: none;
+    border: solid 7px transparent;
+}
