@@ -15,7 +15,7 @@ const App = {
     init: () => {
         App.attachListeners()
 
-        if (App.store.getItem('username')){
+        if ( App.store.getItem('username') ) {
             App.playerA = App.store.getItem('username')
             App.getEl('intro').style.display = 'none'
             App.menu()
@@ -26,7 +26,8 @@ const App = {
         App.playerA = App.getEl('nameInput').value
         if (App.playerA === '') {
             App.playerA = 'A'
-        }else{
+        }
+        else {
             App.store.setItem('username', App.playerA)
         }
 
@@ -36,11 +37,12 @@ const App = {
 
     menu: () => {
         App.getEl('game').style.display = 'none'
+        App.getEl('room').style.display = 'none'
         App.getEl('menu').style.display = 'block'
     },
 
     game: () => {
-        const info = {username: App.playerA}
+        const info = { username: App.playerA }
 
         socket.emit('new game', info, (error, data) => {
             App.room  = data.roomID
@@ -53,7 +55,7 @@ const App = {
     },
     
     room: () => {
-        const info = {name: App.playerA}
+        const info = { name: App.playerA }
 
         socket.emit('new room', info, (error, data) => {
             App.room  = data.roomID
@@ -68,7 +70,7 @@ const App = {
 
     join: () => {
         const input = prompt("Enter Room Id: ", "")
-        const info = {name: App.playerA, roomID: input}
+        const info = { name: App.playerA, roomID: input }
 
         socket.emit('join room', info, (error, data) => {
             App.room  = data.roomID
@@ -94,6 +96,7 @@ const App = {
         const table = document.createElement('table')
         for (let i = 0; i < 3; i++) {
             let row = document.createElement('tr')
+
             for (let j = 0; j < 3; j++) {
                 let col = document.createElement('td')
                 let div = document.createElement('div')
@@ -109,12 +112,14 @@ const App = {
                 col.appendChild(div)
                 row.appendChild(col)
             }
+
             table.appendChild(row)
         }
+
         board.appendChild(table)
 
         App.getEl('playerA').innerHTML = App.playerA
-        App.getEl('playerB').innerHTML = App.playerB || 'B'
+        App.getEl('playerB').innerHTML = App.playerB || 'Opponent'
         App.getEl('playerAWins').innerHTML = App.playerAWins
         App.getEl('playerBWins').innerHTML = App.playerBWins
 
@@ -125,7 +130,7 @@ const App = {
         if (App.updating === true) {
             return
         }
-        if (App.turn === false){
+        if (App.turn === false) {
             return App.notify('Opponent\'s turn')
         }
         if (App.playerB === null) {
@@ -148,22 +153,23 @@ const App = {
     update: (x, y, piece, state) => {
         const board = App.getEl('board').firstChild
         const el = board.rows[x].cells[y].firstChild
-        if (piece === 0){
+
+        if (piece === 0) {
             el.className = 'circle'
         }
         else {
             el.className = 'cross'
         }
-        el.parentNode.onclick = null
 
         if (App.piece !== piece) {
             App.turn = true
         }
 
-        if (state !== null && state !== 0){
+        if (state !== null && state !== 0) {
             App.over(piece, state)
         }
 
+        el.parentNode.onclick = null
         App.updating = false
     },
 
@@ -173,7 +179,7 @@ const App = {
             App.playerAWins += 1
             App.notify('You Won')
         }
-        else{
+        else {
             App.turn = false
             App.playerBWins += 1
             App.notify('You Lose')
@@ -199,10 +205,11 @@ const App = {
 
     notify: (msg) => {
         clearInterval(App.msgID)
+        
         const el = App.getEl('message')
         el.innerHTML = msg
         el.style.visibility = 'visible'
-
+        
         setTimeout(() => {
             App.msgID = el.style.visibility = 'hidden'
         }, 1500)
@@ -219,7 +226,7 @@ const App = {
 
         App.getEl('room').onclick = (el) => {
             el.target.select();
-            if (document.execCommand('copy')){
+            if ( document.execCommand('copy') ) {
                 el.target.selectionStart = el.target.selectionEnd;
             }
         }
@@ -256,7 +263,7 @@ socket.on('update', (data) => {
 });
 
 socket.on('join game', () => {
-    App.playerB = 'B'
+    App.playerB = 'Opponent'
     App.notify('Player has joined')
     socket.emit('username');
     App.getEl('room').style.display = 'none'
