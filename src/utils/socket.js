@@ -98,8 +98,6 @@ module.exports = function(server){
                 x: data.x,
                 y: data.y
             }
-    
-            const clients = clientsConnected(io, socket.roomID)
 
             if ( boards[socket.roomID].update(data.x, data.y, data.piece) ) {
                 status.state = boards[socket.roomID].getState()

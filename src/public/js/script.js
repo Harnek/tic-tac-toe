@@ -178,7 +178,10 @@ const App = {
     },
 
     over: (piece, state) => {
-        if (App.piece === piece) {
+        if (state === 2) {
+            App.notify('Game Draw')
+        }
+        else if (App.piece === piece) {
             App.turn = true
             App.playerAWins += 1
             App.notify('You Won')
