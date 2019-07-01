@@ -64,10 +64,10 @@ module.exports = function(server){
         socket.on('join room', (data, callback) => {
             let clients = clientsConnected(io, data.roomID)
             if (clients === 0) {
-                return callback('Invalid Game')
+                return callback('Invalid Room')
             }
             if (clients === 2) {
-                return callback('Game Full')
+                return callback('Room Full')
             }
 
             let status = {

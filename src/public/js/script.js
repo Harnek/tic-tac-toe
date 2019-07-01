@@ -50,7 +50,7 @@ const App = {
             App.turn  = data.turn
             
             App.create()
-            App.notify('Wait for player')
+            App.notify('Wait for 2nd player')
         })
     },
     
@@ -69,14 +69,18 @@ const App = {
     },
 
     join: () => {
-        const input = prompt("Enter Room Id: ", "")
-        const info = { name: App.playerA, roomID: input }
+        const roomID = App.getEl('roomInput').value
+        const info = { name: App.playerA, roomID }
 
         socket.emit('join room', info, (error, data) => {
+            if (error) {
+                return App.notify(error)
+            }
             App.room  = data.roomID
             App.piece = data.piece
             App.turn  = data.turn
         
+            App.getEl('join').style.display = 'none'
             App.create()
         })
     },
@@ -219,7 +223,15 @@ const App = {
         App.getEl('continueBt').onclick = App.intro
         App.getEl('newGameBt').onclick  = App.game
         App.getEl('newRoomBt').onclick  = App.room
-        App.getEl('joinRoomBt').onclick = App.join
+        App.getEl('joinRoomBt').onclick = () => {
+            App.getEl('menu').style.display = 'none'
+            App.getEl('join').style.display = 'block'
+        }
+        App.getEl('joinBt').onclick = App.join
+        App.getEl('backBt').onclick = () => {
+            App.getEl('join').style.display = 'none'
+            App.getEl('menu').style.display = 'block'
+        }
         App.getEl('title').onclick      = App.reset
         App.getEl('title').style.cursor = 'pointer'
         App.getEl('darkBt').onclick = App.dark
@@ -275,7 +287,7 @@ socket.on('leave game', () => {
 })
 
 socket.on('username', (username) => {
-    App.playerB = username || 'B'
+    App.playerB = username || 'Opponent'
     App.getEl('playerB').innerHTML = App.playerB
 })
 

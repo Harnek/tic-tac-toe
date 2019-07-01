@@ -67,7 +67,7 @@
     font-size: 0.9em;
 }
 
-#nameInput {
+.textInput {
     border-radius: 3em;
     padding: 0.75em 2em;
     display: inline-block;
@@ -86,7 +86,7 @@ span {
     margin: 0 15% 0 15%;
 }
 
-#menu {
+#menu, #join {
     display: none;
 }
 
